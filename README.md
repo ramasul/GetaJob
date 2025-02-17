@@ -3,6 +3,8 @@ Platform yang mengotomatiskan proses pencarian kerja dan seleksi kandidat untuk 
 
 Kelompok Get a Job
 
-Ketua Kelompok:
-Anggota 1:
+Ketua Kelompok: 
+
+Anggota 1: 
+
 Anggota 2:
