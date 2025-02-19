@@ -24,6 +24,14 @@ Salah satu sumber informasi pekerjaan terdapat pada pemberitaan dari surat kabar
 Di sisi lain, dilihat dari sudut sisi pemberi kerja, terdapat banyak perusahaan – perusahaan dan UMKM yang mengalami kesulitan dalam masa perekrutan dan seleksi pegawai barunya. Dimulai dari saat proses penyebaran informasi yang membutuhkan banyak biaya, sampai saat penyeleksian calon karyawan yang tidak sesuai dengan kriteria perusahaan.
 Hampir seluruh perusahaan besar telah memiliki biaya untuk mengakomodasi pengiklanan melalui berbagai media [3]. Namun, perusahaan kecil hingga UMKM tidak memiliki fasilitas tersebut. Terlebih lagi, perusahaan besar cenderung hanya mengincar seseorang dengan pendidikan di atas sarjana. Hal ini mempersulit seseorang di tingkat pendidikan lebih rendah untuk menemukan sumber informasi pekerjaan untuknya.
 
+![Alt text](../static/GraphProblem.png)
+
+### Rumusan Permasalahan:
+
+1. Bagaimana cara membuat sebuah sistem yang dapat mempermudah masyarakat mencari pekerjaan?
+2. Bagaimana cara membuat sumber informasi pekerjaan bagi seluruh kalangan masyarakat?
+3. Bagaimana cara membuat sebuah sistem yang dapat mempermudah perusahaan dan UMKM dalam mencari tenaga kerja?
+
 ### Ide/Solusi:
 
 Platform yang mengotomatiskan proses pencarian kerja dan seleksi kandidat untuk job seekers dan recruiters. Dengan teknologi AI Resume Parsing & Matching, sistem dapat mengekstrak informasi dari CV, mencocokkannya dengan lowongan pekerjaan yang sesuai, serta membantu perusahaan dalam menyaring kandidat secara efisien.
