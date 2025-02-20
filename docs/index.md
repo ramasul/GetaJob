@@ -7,13 +7,14 @@ Anggota:
 2. Flavia Hidayriamraata Pualam - 22/494376/TK/54219
 3. Muhammad Hilmi Dzaki Wismadi - 22/497591/TK/54539
 
-## Project Senior
+**Project Senior**  
+**Departemen Teknologi Elektro dan Teknologi Informasi, Fakultas Teknik, Universitas Gadjah Mada**  
+**Nama Produk: GetaJob**
+**Jenis Produk: Layanan aplikasi Job-seeking**
 
-## Departemen Teknologi Elektro dan Teknologi Informasi, Fakultas Teknik, Universitas Gadjah Mada
+---
 
-### Nama Produk: GetaJob
-
-### Jenis Produk: Layanan aplikasi Job-seeking
+## Modul 1
 
 ### Latar Belakang:
 
@@ -23,6 +24,8 @@ Salah satu sumber informasi pekerjaan terdapat pada pemberitaan dari surat kabar
 
 Di sisi lain, dilihat dari sudut sisi pemberi kerja, terdapat banyak perusahaan – perusahaan dan UMKM yang mengalami kesulitan dalam masa perekrutan dan seleksi pegawai barunya. Dimulai dari saat proses penyebaran informasi yang membutuhkan banyak biaya, sampai saat penyeleksian calon karyawan yang tidak sesuai dengan kriteria perusahaan.
 Hampir seluruh perusahaan besar telah memiliki biaya untuk mengakomodasi pengiklanan melalui berbagai media [3]. Namun, perusahaan kecil hingga UMKM tidak memiliki fasilitas tersebut. Terlebih lagi, perusahaan besar cenderung hanya mengincar seseorang dengan pendidikan di atas sarjana. Hal ini mempersulit seseorang di tingkat pendidikan lebih rendah untuk menemukan sumber informasi pekerjaan untuknya.
+
+![Grafik Pengangguran](static/images/GrafikPengangguran.png)
 
 ### Rumusan Permasalahan:
 
@@ -79,3 +82,49 @@ Key Competitive Advantage & Unique Value: AI yang terintegrasi tidak hanya CV na
 [1] R. P. Kurnia, Y. J. Sy, W. F. Zalmi, “Perancangan Job Seeker – Aplilasi [sic] Pencari Kerja Menggunakan PHP dan MYSQL,” JOSTECH: Journal of Science and Technology, vol. 4, no. 1, 87 - 96, 2024.  
 [2] M. T. Parinsi, V. R. Palilingan, O. Kembuan, K. F. Ratumbuisang, “Job seeker information system using online web based and android mobile phones,” IOP Conf. Series: Materials Science and Engineering 830 (2020) 022093, 2019, doi:10.1088/1757-899X/830/2/022093  
 [3] J. S. Asa, O. Bumma, D. Tamara, C. M. Sarungu, “Android Based Job Search Application “Megawe” for The Segment of Workers with an Education Level Below a University Degree,” 8th International Conference on Computer Science and Computational Intelligence (ICCSCI 2023), 194 - 203, 2023.
+
+## Modul 2
+
+### Metodologi SDLC
+
+Metodologi yang digunakan: Pada proyek kamu mengimplementasikan penggunaan metodologi Agile Scrum
+Alasannya:
+
+- Penggunaan Scrum Framework sehingga pengembangan dan perilisan fitur dapat dibagi pada sprint
+- Fleksibel terhadap perubahan apabila terdapat kebutuhan requirement saat pengembangan
+- Mengintegrasikan fitur secara bertahap sehingga dapat meminimalisir resiko karena pengujian dan validasi setiap tahap
+
+### Perancangan tahap 1 - 3 SDLC
+
+1. **Tujuan dari produk**
+
+   - Mempercepat proses rekrutmen dengan otomatisasi screening dan pencocokan kandidat menggunakan AI.
+   - Meningkatkan akurasi dalam menilai dan mencocokkan kandidat sesuai kualifikasi yang dibutuhkan.
+   - Menyederhanakan pengalaman bagi pelamar kerja dan perusahaan melalui sistem yang efisien dan mudah digunakan.
+
+2. **Pengguna potensial dari produk dan kebutuhan para pengguna tersebut**
+
+   - **Perusahaan (HR dan Rekruter)**  
+     **Kebutuhan:** Menyaring dan menilai kandidat secara cepat dan akurat, mengurangi beban kerja manual, dan mempercepat proses perekrutan.
+   - **Pelamar Kerja (Job Seekers)**  
+     **Kebutuhan:** Mendapatkan rekomendasi pekerjaan yang sesuai, mempermudah proses pengiriman lamaran, dan meningkatkan peluang diterima melalui CV yang dioptimalkan.
+   - **Startup dan UMKM**  
+     **Kebutuhan:** Akses ke alat rekrutmen yang terjangkau dan otomatis untuk menemukan kandidat berkualitas tanpa memiliki tim HR yang besar.
+
+3. **Use Case diagram**
+4. **Functional requirements untuk use case yang telah dirancang**
+
+5. **Entity Relationship Diagram**
+   ![Grafik Pengangguran](static/images/ERD%20Senpro.drawio.png)
+6. **Low-fidelity Wireframe**
+   Link: [Lo-fi Wireframe](https://www.figma.com/design/NZVaTCmaFTqb4o9PoBJ0Bk/SenPro?node-id=1-3&t=x75r4jDMdxy2eIj3-1)
+   ![Login Page](static/images/LoginCustomer.png)
+   ![Job List](static/images/HeroApplier.png)
+   ![Job Detail](static/images/JobDetails.png)
+   ![Dashboard Applier](static/images/DashboardApplier.png)
+   ![Dashboard Recruiter](static/images/DashboardRecruiterOverview.png)
+   ![Job Title Details](static/images/JobTitleDetails.png)
+   ![Extracted Data](static/images/ScoutApplier.png)
+
+7. **Gantt-Chart pengerjaan proyek dalam kurun waktu 1 semester**
+   ![Gantt-Chart](static/images/GanttChart.png)
