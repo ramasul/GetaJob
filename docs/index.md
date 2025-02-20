@@ -115,19 +115,20 @@ Alasannya:
    ![Use Case Diagram](static/images/UseCase.png)
 
 4. **Functional requirements untuk use case yang telah dirancang**
-   | FR | Deskripsi |
-   |------------------------------|-------------------------------------------------------------------------------------------|
-   | Register/Login | Sistem memungkinkan pengguna untuk membuat akun atau masuk ke akun yang telah dibuat dengan username dan password |
-   | Upload CV | Sistem memungkinkan Applier untuk mengunggah CV |
-   | Search Job | Sistem memungkinkan Applier untuk mencari pekerjaan |
-   | Apply Job | Sistem memungkinkan Applier untuk melamar pekerjaan |
-   | View Application Status | Sistem memungkinkan Applier untuk melihat status lamaran pekerjaan mereka |
-   | Receive Job Recommendation | Sistem memberikan rekomendasi pekerjaan yang sesuai dengan Applier berdasarkan CV |
-   | Post Job | Sistem memungkinkan Recruiter untuk memposting lowongan pekerjaan |
-   | View Candidates Matches | Sistem memungkinkan Recruiter untuk melihat kandidat yang cocok dengan lowongan pekerjaan berdasarkan sistem pencocokan |
-   | Filter Candidates | Sistem memungkinkan Recruiter untuk memfilter kandidat berdasarkan kriteria tertentu |
-   | Review Application | Sistem memungkinkan Recruiter untuk mereview lamaran kerja yang diajukan oleh Applier |
-   | Schedule Interview | Sistem memungkinkan Recruiter untuk menentukan jadwal wawancara dengan kandidat terpilih |
+
+   | FR                           | Deskripsi                                                                                                                     |
+   | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+   | Register/Login               | Sistem memungkinkan pengguna untuk membuat akun atau masuk ke akun yang telah dibuat dengan username dan password             |
+   | Upload CV                    | Sistem memungkinkan Applier untuk mengunggah CV                                                                               |
+   | Search Job                   | Sistem memungkinkan Applier untuk mencari pekerjaan                                                                           |
+   | Apply Job                    | Sistem memungkinkan Applier untuk melamar pekerjaan                                                                           |
+   | View Application Status      | Sistem memungkinkan Applier untuk melihat status lamaran pekerjaan mereka                                                     |
+   | Receive Job Recommendation   | Sistem memberikan rekomendasi pekerjaan yang sesuai dengan Applier berdasarkan CV                                             |
+   | Post Job                     | Sistem memungkinkan Recruiter untuk memposting lowongan pekerjaan                                                             |
+   | View Candidates Matches      | Sistem memungkinkan Recruiter untuk melihat kandidat yang cocok dengan lowongan pekerjaan berdasarkan sistem pencocokan       |
+   | Filter Candidates            | Sistem memungkinkan Recruiter untuk memfilter kandidat berdasarkan kriteria tertentu                                          |
+   | Review Application           | Sistem memungkinkan Recruiter untuk mereview lamaran kerja yang diajukan oleh Applier                                         |
+   | Schedule Interview           | Sistem memungkinkan Recruiter untuk menentukan jadwal wawancara dengan kandidat terpilih                                      |
    | AI Parsing & Matching System | Sistem menggunakan teknologi AI untuk mengekstrak data dari CV dan mencocokkan kandidat dengan lowongan pekerjaan yang sesuai |
 
 5. **Entity Relationship Diagram**
