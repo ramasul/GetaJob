@@ -4,7 +4,7 @@ Platform yang mengotomatiskan proses pencarian kerja dan seleksi kandidat untuk 
 
 Kelompok Get a Job
 
-Ketua Kelompok:   
+Ketua Kelompok:  Muhammad Hilmi Dzaki Wismadi - 22/497591/TK/54539  
 
 Anggota 1: Rama Sulaiman Nurcahyo - 22/492727/TK/53940  
 Anggota 2:   
