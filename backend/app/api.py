@@ -55,7 +55,16 @@ async def root():
                     <a href="/appliers" class="block bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
                         /appliers
                     </a>
-                    <a href="/docs" class="block bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+                    <a href="/recruiters" class="block bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+                        /recruiters
+                    </a>
+                    <a href="/jobs" class="block bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+                        /jobs
+                    </a>
+                    <a href="/job_applications" class="block bg-blue-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
+                        /job_applications
+                    </a>
+                    <a href="/docs" class="block bg-green-500 text-white py-2 rounded-lg shadow-md hover:bg-blue-600 transition">
                         Documentation
                     </a>
                 </div>
@@ -63,8 +72,6 @@ async def root():
         </body>
     </html>
     """, status_code=200, media_type="text/html")
-
-app.include_router(api_router)
 
 # Health check
 @api_router.get("/health")
@@ -77,6 +84,8 @@ async def health_check():
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
+
+app.include_router(api_router)
 
 # Startup and shutdown events
 @app.on_event("startup")
