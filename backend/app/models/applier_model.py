@@ -42,7 +42,7 @@ class ApplierBase(BaseModel):
 # Password taro disini
 class ApplierCreate(ApplierBase):
     dob: date
-    password: str
+    password: str = Field(..., min_length=8)
 
 # ApplierUpdate adalah class yang digunakan untuk mengupdate data applier
 # Password tidak dimasukkan

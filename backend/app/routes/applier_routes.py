@@ -1,6 +1,6 @@
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 
 from app.config.db import Database
@@ -10,8 +10,8 @@ from app.models.applier_model import ApplierCreate, ApplierUpdate, ApplierRespon
 router = APIRouter(prefix="/appliers", tags=["Appliers"])
 
 class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str
+    current_password: str = Field(..., min_length=8)
+    new_password: str = Field(..., min_length=8)
 
 async def get_applier_controller() -> ApplierController:
     """Dependency untuk mendapatkan instance ApplierController"""

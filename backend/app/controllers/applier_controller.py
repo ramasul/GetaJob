@@ -8,9 +8,9 @@ from fastapi import HTTPException, status
 
 from app.models.applier_model import ApplierCreate, ApplierUpdate, ApplierInDB, ApplierResponse
 from app.utils.common_fn import convert_date_to_datetime
+from app.utils.auth_helper import get_password_hash, verify_password
 
 logger = logging.getLogger(__name__)
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class ApplierController:
     # Database MongoDB yang digunakan
@@ -18,23 +18,24 @@ class ApplierController:
     def __init__(self, database: AsyncIOMotorDatabase):
         self.db = database
         self.collection = database.appliers
+        self.recruiter_collection = database.recruiters
     
     async def create_applier(self, applier: ApplierCreate) -> ApplierResponse:
         """Membuat data applier baru ke database"""
-        if await self.collection.find_one({"username": applier.username}):
+        if await self.collection.find_one({"username": applier.username}) or await self.recruiter_collection.find_one({"username": applier.username}):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail="Username already taken"
             )
         
-        if await self.collection.find_one({"email": applier.email}):
+        if await self.collection.find_one({"email": applier.email}) or await self.recruiter_collection.find_one({"email": applier.email}):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail="Email already registered"
             )
         
         # Hash password untuk keamanan
-        hashed_password = pwd_context.hash(applier.password)
+        hashed_password = get_password_hash(applier.password)
         dob_datetime = convert_date_to_datetime(applier.dob)
 
         # Buat objek Applier yang akan disimpan ke database
@@ -137,7 +138,7 @@ class ApplierController:
             
             # Cek apakah username diubah dan sudah ada yang menggunakan username tersebut
             if "username" in update_dict and update_dict["username"] != applier["username"]:
-                if await self.collection.find_one({"username": update_dict["username"]}):
+                if await self.collection.find_one({"username": update_dict["username"]}) or await self.recruiter_collection.find_one({"username": update_dict["username"]}):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Username already taken"
@@ -145,7 +146,7 @@ class ApplierController:
             
             # Cek apakah email diubah dan sudah ada yang menggunakan email tersebut
             if "email" in update_dict and update_dict["email"] != applier["email"]:
-                if await self.collection.find_one({"email": update_dict["email"]}):
+                if await self.collection.find_one({"email": update_dict["email"]}) or await self.recruiter_collection.find_one({"email": update_dict["email"]}):
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Email already registered"
@@ -200,20 +201,20 @@ class ApplierController:
                 )
             
             # Cek apakah password lama benar
-            if not pwd_context.verify(current_password, applier["password_hash"]):
+            if not verify_password(current_password, applier["password_hash"]):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Current password is incorrect"
                 )
             
-            if pwd_context.verify(new_password, applier["password_hash"]):
+            if verify_password(new_password, applier["password_hash"]):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="New password cannot be the same as the current password"
                 )
             
             # Hash password baru
-            hashed_password = pwd_context.hash(new_password)
+            hashed_password = get_password_hash(new_password)
             
             # Update password
             result = await self.collection.update_one(
