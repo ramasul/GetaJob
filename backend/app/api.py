@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config.db import Database
 
 from app.routes.applier_routes import router as applier_router
+from app.routes.recruiter_routes import router as recruiter_router
+
 load_dotenv()
 # Konfigurasi logging
 logging.basicConfig(
@@ -33,12 +35,15 @@ app.add_middleware(
 
 # Masukkan semua route yang telah dibuat ke dalam app
 app.include_router(applier_router)
+app.include_router(recruiter_router)
 
 api_router = APIRouter()
 
+
 @api_router.get("/", response_class=HTMLResponse)
 async def root():
-    return HTMLResponse(content="""
+    return HTMLResponse(
+        content="""
     <!DOCTYPE html>
     <html lang="en">
         <head>
@@ -71,7 +76,11 @@ async def root():
             </div>
         </body>
     </html>
-    """, status_code=200, media_type="text/html")
+    """,
+        status_code=200,
+        media_type="text/html",
+    )
+
 
 # Health check
 @api_router.get("/health")
@@ -85,7 +94,9 @@ async def health_check():
         logger.error(f"Health check failed: {e}")
         return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
 
+
 app.include_router(api_router)
+
 
 # Startup and shutdown events
 @app.on_event("startup")
@@ -94,12 +105,15 @@ async def startup_db_client():
     await Database.connect_db(db_url)
     logger.info("Connected to the MongoDB database!")
 
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     await Database.close_db()
     logger.info("Disconnected from the MongoDB database")
 
+
 # Menjalanakan aplikasi FastAPI
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("app.api:app", host="0.0.0.0", port=8000, reload=True)
