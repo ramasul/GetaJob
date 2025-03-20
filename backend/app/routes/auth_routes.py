@@ -1,18 +1,50 @@
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, Query, HTTPException, status
-
+from fastapi import APIRouter, Depends, Query, HTTPException, status, Body
+from fastapi.security import OAuth2PasswordRequestForm
 from app.config.db import Database
 from app.controllers.auth_controller import AuthController
 from app.models.auth_model import *
+from app.utils.auth_helper import oauth2_scheme
 
-router = APIRouter(prefix="/auth", tags=["authentication"])
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 async def get_auth_controller() -> AuthController:
     """Dependency untuk mendapatkan instance AuthController."""
     db = Database.get_db()
     return AuthController(db)
+
+@router.post("/login", response_model=Token)
+async def login(
+    form_data: LoginRequest,
+    controller: AuthController = Depends(get_auth_controller)
+):
+    """Login dengan username/email dan password."""
+    token = await controller.login_user(form_data.username_or_email, form_data.password)
+    return token
+
+@router.post("/refresh", response_model=Token)
+async def refresh_token(
+    refresh_token: str = Body(..., embed=True),
+    controller: AuthController = Depends(get_auth_controller)
+):
+    """Refresh access token menggunakan refresh token."""
+    token = await controller.refresh_token(refresh_token)
+    return token
+
+@router.get("/me", response_model=UserResponse)
+async def get_current_user(
+    controller: AuthController = Depends(get_auth_controller),
+    token: str = Depends(oauth2_scheme)
+):
+    """Mendapatkan data user yang sedang login."""
+    user = await controller.get_current_user(token)
+    return user
+
+
+
+# Forget password
 
 @router.post("/forgot-password")
 async def forgot_password(
