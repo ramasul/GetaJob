@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional, Union, Dict, Any
 from pydantic import BaseModel, EmailStr, Field
-from fastapi import Depends, Request, HTTPException, status
+from fastapi import Depends, Request, Response, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.context import CryptContext
@@ -16,8 +16,8 @@ from email.mime.multipart import MIMEMultipart
 
 from app.models.auth_model import Token, TokenData, UserResponse
 from app.utils.common_fn import convert_date_to_datetime
-from app.utils.auth_helper import oauth2_scheme, get_password_hash, verify_password, create_access_token, create_refresh_token
-from app.utils.constants import OTP_EXPIRED_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES, JWT_ALGORITHM
+from app.utils.auth_helper import SECRET_KEY, oauth2_scheme, get_password_hash, verify_password, create_access_token, create_refresh_token
+from app.utils.constants import OTP_EXPIRED_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES, JWT_ALGORITHM, REFRESH_TOKEN_EXPIRE_DAYS
 from app.controllers.applier_controller import ApplierController
 from app.controllers.recruiter_controller import RecruiterController
 
@@ -169,13 +169,13 @@ class AuthController:
             logger.error(f"Error resetting password: {e}")
             return False
         
-    async def authenticate_user(self, username_or_email: str, password: str) -> Union[UserResponse, None]:
+    async def authenticate_user(self, identifier: str, password: str) -> Union[UserResponse, None]:
         """Autentikasi user berdasarkan email dan password."""
         try:
             # Try to find user in appliers collection
-            applier = await self.db.appliers.find_one({"username": username_or_email})
+            applier = await self.db.appliers.find_one({"username": identifier})
             if not applier:
-                applier = await self.db.appliers.find_one({"email": username_or_email})
+                applier = await self.db.appliers.find_one({"email": identifier})
             if applier and verify_password(password, applier["password_hash"]):
                 return UserResponse(
                     id=str(applier["_id"]),
@@ -186,9 +186,9 @@ class AuthController:
                 )
                 
             # If not found or password doesn't match, try recruiters collection
-            recruiter = await self.db.recruiters.find_one({"username": username_or_email})
+            recruiter = await self.db.recruiters.find_one({"username": identifier})
             if not recruiter:
-                recruiter = await self.db.recruiters.find_one({"email": username_or_email})
+                recruiter = await self.db.recruiters.find_one({"email": identifier})
             if recruiter and verify_password(password, recruiter["password_hash"]):
                 return UserResponse(
                     id=str(recruiter["_id"]),
@@ -205,13 +205,13 @@ class AuthController:
             logger.error(f"Authentication error: {e}")
             return None
         
-    async def login_user(self, username_or_email: str, password: str, request: Request) -> Token:
-        """Login user dan mengembalikan token akses dan token refresh."""
+    async def login_user(self, identifier: str, password: str, request: Request, response: Response) -> Token:
+        """Login user dan set HTTP-only cookie untuk authentication."""
         ip_address = request.client.host
-        user = await self.authenticate_user(username_or_email, password)
+        user = await self.authenticate_user(identifier, password)
 
         success = user is not None
-        await self.log_login_attempt(username_or_email, ip_address, success)
+        await self.log_login_attempt(identifier, ip_address, success)
 
         if not user:
             raise HTTPException(
@@ -233,18 +233,49 @@ class AuthController:
         )
         refresh_token = create_refresh_token(data = token_data)
 
-        return Token(
-            access_token = access_token,
-            refresh_token = refresh_token,
-            token_type = "bearer",
-            expires_in = ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        # Set HttpOnly cookies
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {access_token}",
+            httponly=True,
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            samesite="lax",
+            secure=False,  # Jika pakai HTTPS set true
         )
         
-    async def refresh_token(self, refresh_token: str) -> Token:
-        """Membuat token baru menggunakan token refresh."""
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+            expires=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+            samesite="lax",
+            secure=False,  # Jika pakai HTTPS set true
+        )
+
+        # Return user data without tokens
+        return UserResponse(
+            id=user.id,
+            username=user.username,
+            name=user.name,
+            email=user.email,
+            user_type=user.user_type
+        )
+        
+    async def refresh_token(self, request: Request, response: Response) -> Token:
+        """Membuat token baru menggunakan token refresh dengan HTTPOnly Cookie."""
+        refresh_token = request.cookies.get("refresh_token")
+        if not refresh_token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token missing",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
         try:
             # Decode refresh token
-            payload = jwt.decode(refresh_token, os.getenv("JWT_SECRET_KEY"), algorithms=[JWT_ALGORITHM])
+            payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
             user_id = payload.get("sub")
             user_type = payload.get("user_type")
 
@@ -263,48 +294,78 @@ class AuthController:
 
             # Buat token baru
             new_access_token = create_access_token(
-                data = token_data,
-                expires_delta = timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES)
+                data=token_data,
+                expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
             )
-            new_refresh_token = create_refresh_token(data = token_data)
+            new_refresh_token = create_refresh_token(data=token_data)
 
-            return Token(
-                access_token=new_access_token,
-                refresh_token=new_refresh_token,
-                token_type="bearer",
-                expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            # Set HttpOnly cookies
+            response.set_cookie(
+                key="access_token",
+                value=f"Bearer {new_access_token}",
+                httponly=True,
+                max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                expires=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+                samesite="lax",
+                secure=False,
             )
             
+            response.set_cookie(
+                key="refresh_token",
+                value=new_refresh_token,
+                httponly=True,
+                max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+                expires=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+                samesite="lax",
+                secure=False,
+            )
+
+            return {"message": "Tokens refreshed successfully"}
+        
         except JWTError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid refresh token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
-    async def get_current_user(self, token: str = Depends(oauth2_scheme)) -> UserResponse:
-        """Mengambil data user berdasarkan token akses."""
+
+    async def logout(self, response: Response):
+        """Logout user dengan clear authentication cookies."""
+        response.delete_cookie(key="access_token")
+        response.delete_cookie(key="refresh_token")
+        return {"message": "Logged out successfully"}
+
+    async def get_current_user(self, request: Request) -> UserResponse:
+        """Mendapatkan data user yang sedang login dengan HTTPOnly Cookies."""
         credentials_exception = HTTPException(
-            status_code = status.HTTP_401_UNAUTHORIZED,
-            detail = "Could not validate credentials",
-            headers = {"WWW-Authenticate": "Bearer"},
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
+        auth_cookie = request.cookies.get("access_token")
+        if not auth_cookie:
+            raise credentials_exception
+        
         try:
+            # Extract token from cookie
+            scheme, token = auth_cookie.split()
+            if scheme.lower() != "bearer":
+                raise credentials_exception
+            
             # Decode token
-            payload = jwt.decode(token, os.getenv("JWT_SECRET_KEY"), algorithms = [JWT_ALGORITHM])
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[JWT_ALGORITHM])
             user_id = payload.get("sub")
             user_type = payload.get("user_type")
             
             if user_id is None or user_type is None:
                 raise credentials_exception
                 
-            token_data = TokenData(user_id = user_id, user_type = user_type)
+            token_data = TokenData(user_id=user_id, user_type=user_type)
             
-        except JWTError:
+        except (JWTError, ValueError):
             raise credentials_exception
         
-        # Mengambil data user berdasarkan user type
         if token_data.user_type == "applier":
             try:
                 user = await self.applier_controller.get_applier(token_data.user_id)

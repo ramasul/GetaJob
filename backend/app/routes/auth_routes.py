@@ -1,7 +1,7 @@
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, Request, HTTPException, status, Body
+from fastapi import APIRouter, Depends, Request, Response, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from app.config.db import Database
 from app.controllers.auth_controller import AuthController
@@ -15,34 +15,44 @@ async def get_auth_controller() -> AuthController:
     db = Database.get_db()
     return AuthController(db)
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=UserResponse)
 async def login(
     form_data: LoginRequest,
-    ip_request: Request,
+    request: Request,
+    response: Response,
     controller: AuthController = Depends(get_auth_controller)
 ):
     """Login dengan username/email dan password."""
-    token = await controller.login_user(form_data.username_or_email, form_data.password, ip_request)
-    return token
+    user = await controller.login_user(form_data.identifier, form_data.password, request, response)
+    return user
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=dict)
 async def refresh_token(
-    refresh_token: str = Body(..., embed=True),
+    request: Request,
+    response: Response,
     controller: AuthController = Depends(get_auth_controller)
 ):
     """Refresh access token menggunakan refresh token."""
-    token = await controller.refresh_token(refresh_token)
-    return token
+    result = await controller.refresh_token(request, response)
+    return result
+
+@router.post("/logout", response_model=dict)
+async def logout(
+    response: Response,
+    controller: AuthController = Depends(get_auth_controller)
+):
+    """Logout user dan clear authentication cookies."""
+    result = await controller.logout(response)
+    return result
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(
-    controller: AuthController = Depends(get_auth_controller),
-    token: str = Depends(oauth2_scheme)
+    request: Request,
+    controller: AuthController = Depends(get_auth_controller)
 ):
     """Mendapatkan data user yang sedang login."""
-    user = await controller.get_current_user(token)
+    user = await controller.get_current_user(request)
     return user
-
 
 
 # Forget password

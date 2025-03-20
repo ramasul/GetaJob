@@ -26,7 +26,7 @@ class TokenData(BaseModel):
 
 # Login models
 class LoginRequest(BaseModel):
-    username_or_email: str
+    identifier: str
     password: str
 
 class UserResponse(BaseModel):
