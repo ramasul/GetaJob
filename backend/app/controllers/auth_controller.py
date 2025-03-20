@@ -6,7 +6,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from typing import Optional, Union, Dict, Any
 from pydantic import BaseModel, EmailStr, Field
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Request, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.context import CryptContext
@@ -29,11 +29,13 @@ class AuthController:
         self.applier_controller = ApplierController(database)
         self.recruiter_controller = RecruiterController(database)
 
-    async def send_password_reset_email(self, email: str) -> bool:
+    async def send_password_reset_email(self, email: str, request: Request) -> bool:
         """
         Menggenerate OTP dan mengirim email reset password.
         Mengembalikan True jika email berhasil dikirim.
         """
+        ip_address = request.client.host
+        await self.log_password_reset_request(email, ip_address)
         try:
             # Cek apakah email ada di database
             user = None
@@ -75,9 +77,6 @@ class AuthController:
             # Kirim email dengan OTP
             sender_email = os.getenv("EMAIL_USER")
             sender_password = os.getenv("EMAIL_PASSWORD")
-
-            logger.info(f"sender_email: {sender_email} and sender_password: {sender_password}")
-            logger.info(f"email: {email} and otp: {otp}")
 
             message = MIMEMultipart("alternative")
             message["Subject"] = "Password Reset OTP"
@@ -130,11 +129,14 @@ class AuthController:
             logger.error(f"Error verifying OTP: {e}")
             return False
     
-    async def reset_password(self, email: str, otp: str, new_password: str) -> bool:
+    async def reset_password(self, email: str, otp: str, new_password: str, request: Request) -> bool:
         """Reset password dari email apabila OTP valid."""
         try:
+            ip_address = request.client.host
+            is_valid = await self.verify_otp(email, otp)
+            await self.log_otp_verification(email, ip_address, is_valid)
             # Verifikasi apakah OTP valid
-            if not await self.verify_otp(email, otp):
+            if not is_valid:
                 return False
             
             # Carilah user berdasarkan email dan OTP untuk mendapatkan user type
@@ -203,9 +205,14 @@ class AuthController:
             logger.error(f"Authentication error: {e}")
             return None
         
-    async def login_user(self, username_or_email: str, password: str) -> Token:
+    async def login_user(self, username_or_email: str, password: str, request: Request) -> Token:
         """Login user dan mengembalikan token akses dan token refresh."""
+        ip_address = request.client.host
         user = await self.authenticate_user(username_or_email, password)
+
+        success = user is not None
+        await self.log_login_attempt(username_or_email, ip_address, success)
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -325,3 +332,49 @@ class AuthController:
                 raise credentials_exception
         else:
             raise credentials_exception
+        
+    # Part: Security Logging
+    async def log_login_attempt(self, email: str, ip_address: str, success: bool):
+        """Log percobaan login ke database."""
+        event = {
+            "timestamp": datetime.now(),
+            "event_type": "login_attempt",
+            "email": email,
+            "ip_address": ip_address,
+            "success": success
+        }
+        await self.db.security_logs.insert_one(event)
+        
+        log_level = logging.INFO if success else logging.WARNING
+        logger.log(
+            log_level, 
+            f"Login attempt - Email: {email}, IP: {ip_address}, Success: {success}"
+        )
+
+    async def log_password_reset_request(self, email: str, ip_address: str):
+        """Log password reset requests untuk keamanan."""
+        event = {
+            "timestamp": datetime.now(),
+            "event_type": "password_reset_request",
+            "email": email,
+            "ip_address": ip_address
+        }
+        await self.db.security_logs.insert_one(event)
+        logger.info(f"Password reset requested - Email: {email}, IP: {ip_address}")
+
+    async def log_otp_verification(self, email: str, ip_address: str, success: bool):
+        """Log percobaan verifikasi OTP."""
+        event = {
+            "timestamp": datetime.now(),
+            "event_type": "otp_verification",
+            "email": email,
+            "ip_address": ip_address,
+            "success": success
+        }
+        await self.db.security_logs.insert_one(event)
+        
+        log_level = logging.INFO if success else logging.WARNING
+        logger.log(
+            log_level, 
+            f"OTP verification - Email: {email}, IP: {ip_address}, Success: {success}"
+        )

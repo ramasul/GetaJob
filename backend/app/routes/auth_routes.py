@@ -1,7 +1,7 @@
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, Query, HTTPException, status, Body
+from fastapi import APIRouter, Depends, Request, HTTPException, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 from app.config.db import Database
 from app.controllers.auth_controller import AuthController
@@ -18,10 +18,11 @@ async def get_auth_controller() -> AuthController:
 @router.post("/login", response_model=Token)
 async def login(
     form_data: LoginRequest,
+    ip_request: Request,
     controller: AuthController = Depends(get_auth_controller)
 ):
     """Login dengan username/email dan password."""
-    token = await controller.login_user(form_data.username_or_email, form_data.password)
+    token = await controller.login_user(form_data.username_or_email, form_data.password, ip_request)
     return token
 
 @router.post("/refresh", response_model=Token)
@@ -49,10 +50,11 @@ async def get_current_user(
 @router.post("/forgot-password")
 async def forgot_password(
     request: ForgotPasswordRequest,
+    ip_request: Request,
     controller: AuthController = Depends(get_auth_controller)
 ):
     """Merequest reset password dengan email."""
-    success = await controller.send_password_reset_email(request.email)
+    success = await controller.send_password_reset_email(request.email, ip_request)
     # Selalu kembalikan message yang sama, biar user tidak tahu apakah email ada di database atau tidak
     return {"message": "If your email is registered, you will receive a password reset OTP"}
 
@@ -73,13 +75,15 @@ async def verify_otp(
 @router.post("/reset-password")
 async def reset_password(
     request: ResetPasswordRequest,
+    ip_request: Request,
     controller: AuthController = Depends(get_auth_controller)
 ):
     """Reset password dengan email dan OTP."""
     success = await controller.reset_password(
         request.email, 
         request.otp, 
-        request.new_password
+        request.new_password,
+        ip_request
     )
     
     if not success:
