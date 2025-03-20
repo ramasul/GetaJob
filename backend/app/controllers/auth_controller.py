@@ -166,3 +166,162 @@ class AuthController:
         except Exception as e:
             logger.error(f"Error resetting password: {e}")
             return False
+        
+    async def authenticate_user(self, username_or_email: str, password: str) -> Union[UserResponse, None]:
+        """Autentikasi user berdasarkan email dan password."""
+        try:
+            # Try to find user in appliers collection
+            applier = await self.db.appliers.find_one({"username": username_or_email})
+            if not applier:
+                applier = await self.db.appliers.find_one({"email": username_or_email})
+            if applier and verify_password(password, applier["password_hash"]):
+                return UserResponse(
+                    id=str(applier["_id"]),
+                    username=applier["username"],
+                    name=applier["name"],
+                    email=applier["email"],
+                    user_type="applier"
+                )
+                
+            # If not found or password doesn't match, try recruiters collection
+            recruiter = await self.db.recruiters.find_one({"username": username_or_email})
+            if not recruiter:
+                recruiter = await self.db.recruiters.find_one({"email": username_or_email})
+            if recruiter and verify_password(password, recruiter["password_hash"]):
+                return UserResponse(
+                    id=str(recruiter["_id"]),
+                    username=recruiter["username"],
+                    name=recruiter["company_name"],
+                    email=recruiter["email"], 
+                    user_type="recruiter"
+                )
+                
+            # If neither found or passwords don't match
+            return None
+            
+        except Exception as e:
+            logger.error(f"Authentication error: {e}")
+            return None
+        
+    async def login_user(self, username_or_email: str, password: str) -> Token:
+        """Login user dan mengembalikan token akses dan token refresh."""
+        user = await self.authenticate_user(username_or_email, password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Buat token data
+        token_data = {
+            "sub": user.id,
+            "user_type": user.user_type
+        }
+
+        # Buat token
+        access_token = create_access_token(
+            data = token_data,
+            expires_delta = timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES)
+        )
+        refresh_token = create_refresh_token(data = token_data)
+
+        return Token(
+            access_token = access_token,
+            refresh_token = refresh_token,
+            token_type = "bearer",
+            expires_in = ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        )
+        
+    async def refresh_token(self, refresh_token: str) -> Token:
+        """Membuat token baru menggunakan token refresh."""
+        try:
+            # Decode refresh token
+            payload = jwt.decode(refresh_token, os.getenv("JWT_SECRET_KEY"), algorithms=[JWT_ALGORITHM])
+            user_id = payload.get("sub")
+            user_type = payload.get("user_type")
+
+            if user_id is None or user_type is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid refresh token",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            
+            # Buat token data
+            token_data = {
+                "sub": user_id,
+                "user_type": user_type
+            }
+
+            # Buat token baru
+            new_access_token = create_access_token(
+                data = token_data,
+                expires_delta = timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES)
+            )
+            new_refresh_token = create_refresh_token(data = token_data)
+
+            return Token(
+                access_token=new_access_token,
+                refresh_token=new_refresh_token,
+                token_type="bearer",
+                expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+            )
+            
+        except JWTError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+    async def get_current_user(self, token: str = Depends(oauth2_scheme)) -> UserResponse:
+        """Mengambil data user berdasarkan token akses."""
+        credentials_exception = HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail = "Could not validate credentials",
+            headers = {"WWW-Authenticate": "Bearer"},
+        )
+
+        try:
+            # Decode token
+            payload = jwt.decode(token, os.getenv("JWT_SECRET_KEY"), algorithms = [JWT_ALGORITHM])
+            user_id = payload.get("sub")
+            user_type = payload.get("user_type")
+            
+            if user_id is None or user_type is None:
+                raise credentials_exception
+                
+            token_data = TokenData(user_id = user_id, user_type = user_type)
+            
+        except JWTError:
+            raise credentials_exception
+        
+        # Mengambil data user berdasarkan user type
+        if token_data.user_type == "applier":
+            try:
+                user = await self.applier_controller.get_applier(token_data.user_id)
+                return UserResponse(
+                    id=token_data.user_id,
+                    username=user.username,
+                    name=user.name,
+                    email=user.email,
+                    user_type="applier"
+                )
+            except HTTPException:
+                raise credentials_exception
+            
+        elif token_data.user_type == "recruiter":
+            try:
+                user = await self.recruiter_controller.get_recruiter(token_data.user_id)
+                return UserResponse(
+                    id=token_data.user_id,
+                    username=user.username,
+                    name=user.company_name,
+                    email=user.email,
+                    user_type="recruiter"
+                )
+            except HTTPException:
+                raise credentials_exception
+        else:
+            raise credentials_exception
