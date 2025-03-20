@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from app.utils.constants import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS, JWT_ALGORITHM
 # Password context for hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 # OAuth2 scheme for token retrieval from requests
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
