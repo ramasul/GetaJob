@@ -2,7 +2,8 @@ from app.utils.object_id import PyObjectId
 from bson import ObjectId
 from datetime import datetime, date
 from typing import List, Optional
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, EmailStr, field_validator, validator
+from email_validator import validate_email, EmailNotValidError
 
 # Kalau misal ada field yang tidak wajib diisi, bisa ditambahkan Optional
 # Kalau misal ada elemen yang punya banyak field, bisa dibuat class baru
@@ -37,6 +38,15 @@ class ApplierBase(BaseModel):
     profile_picture_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+    @validator("username")
+    def username_cannot_be_email(cls, v):
+        if v is not None:
+            try:
+                validate_email(v)
+                raise ValueError("Username cannot be in email format")
+            except EmailNotValidError:
+                pass
+        return v
 
 # ApplierCreate adalah class yang digunakan untuk membuat data applier baru
 # Password taro disini
@@ -58,6 +68,15 @@ class ApplierUpdate(BaseModel):
     profile_picture_url: Optional[str] = None
     resume_url: Optional[str] = None
     update_url: datetime = Field(default_factory=datetime.now)
+    @validator("username")
+    def username_cannot_be_email(cls, v):
+        if v is not None:
+            try:
+                validate_email(v)
+                raise ValueError("Username cannot be in email format")
+            except EmailNotValidError:
+                pass
+        return v
 
 class ApplierInDB(ApplierBase):
     id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id") 

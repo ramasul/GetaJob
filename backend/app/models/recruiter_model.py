@@ -2,7 +2,8 @@ from app.utils.object_id import PyObjectId
 from bson import ObjectId
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, EmailStr, validator
+from email_validator import validate_email, EmailNotValidError
 
 class Address(BaseModel):
     street: Optional[str]
@@ -22,6 +23,15 @@ class RecruiterBase(BaseModel):
     website_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+    @validator("username")
+    def username_cannot_be_email(cls, v):
+        if v is not None:
+            try:
+                validate_email(v)
+                raise ValueError("Username cannot be in email format")
+            except EmailNotValidError:
+                pass
+        return v
 
 class RecruiterCreate(RecruiterBase):
     password: str = Field(..., min_length=8)
@@ -36,6 +46,15 @@ class RecruiterUpdate(BaseModel):
     address: Optional[Address] = None
     website_url: Optional[str] = None
     updated_at: datetime = Field(default_factory=datetime.now)
+    @validator("username")
+    def username_cannot_be_email(cls, v):
+        if v is not None:
+            try:
+                validate_email(v)
+                raise ValueError("Username cannot be in email format")
+            except EmailNotValidError:
+                pass
+        return v
 
 class RecruiterInDB(RecruiterBase):
     id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id")
