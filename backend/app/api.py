@@ -116,6 +116,5 @@ async def shutdown_db_client():
 
 # Menjalanakan aplikasi FastAPI
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("app.api:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app.api:app", host="0.0.0.0", port=port)
