@@ -28,8 +28,8 @@ export default function Login() {
       <div className="w-[60vw] bg-white backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30">
         <div className=" p-6 flex items-center justify-center">
           {/* Logo and branding */}
-          <div className="flex flex-col items-center mb-6 w-[20vw]">
-          <Image
+          <div className="flex flex-col justify-center items-center w-[20vw] mx-auto">
+            <Image
               src="/image/3DHero.png"
               alt="Login"
               width={500}
@@ -120,7 +120,6 @@ export default function Login() {
                     />
                   </svg>
                 </div>
-                
               </div>
 
               <button
