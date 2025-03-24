@@ -2,25 +2,45 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@auth/context";
 
 export default function Login() {
   const [formData, setFormData] = useState({
-    username: "",
+    identifier: "",
     password: "",
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("applier");
+  const { login, error } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission (e.g., API call, etc.)
     console.log(formData);
     console.log("User type:", activeTab);
+    setIsLoading(true);
+    try {
+      await login(formData.identifier, formData.password);
+
+      const redirectPath =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("redirect") ||
+            "/dashboard"
+          : "/dashboard";
+
+      router.push(decodeURIComponent(redirectPath));
+    } catch (err) {
+      console.error("Login failed", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,14 +88,22 @@ export default function Login() {
 
             {/* Login form */}
             <form onSubmit={handleSubmit} className="w-[28vw] space-y-4">
+              {error && (
+                <div
+                  className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                  role="alert"
+                >
+                  <span className="block sm:inline">{error}</span>
+                </div>
+              )}
               <div className="relative text-cyan-500">
                 <input
                   type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
+                  id="identifier"
+                  name="identifier"
+                  value={formData.identifier}
                   onChange={handleChange}
-                  placeholder="Username"
+                  placeholder="Username or Email"
                   className="w-full px-4 py-3 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 pl-10"
                   required
                 />
@@ -124,9 +152,14 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-3 rounded-lg transition-colors duration-200 font-medium"
+                disabled={isLoading}
+                className={`w-full py-3 rounded-lg transition-colors duration-200 font-medium text-white ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-cyan-500 hover:bg-cyan-600"
+                }`}
               >
-                Login
+                {isLoading ? "Logging in... wait" : "Login"}
               </button>
             </form>
 
