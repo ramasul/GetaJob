@@ -6,11 +6,11 @@ export default function Header({ currentPage, userType }) {
     userType === "recruiter"
       ? [
           { name: "Company Profile", href: "/company-profile", key: "company-profile" },
-          { name: "Dashboard", href: "/dashboard", key: "dashboard" },
+          { name: "Dashboard", href: "/recruiter/dashboard", key: "dashboard" },
         ]
       : [
           { name: "Profile", href: "/profile", key: "profile" },
-          { name: "Browse Companies", href: "/browse-companies", key: "browse-companies" },
+          { name: "Browse Companies", href: "/applicant/home", key: "browse-companies" },
         ];
 
   return (
