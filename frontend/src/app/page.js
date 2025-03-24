@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@auth/context";
 
@@ -12,13 +12,34 @@ export default function Login() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("applier");
-  const { login, error } = useAuth();
+  const { login, error, user } = useAuth();
   const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    if (user) {
+      let dashboardPath = "/"; // default kalau ada apa apa
+
+      if (user.user_type === "recruiter") {
+        dashboardPath = "/recruiter/dashboard";
+      } else if (user.user_type === "applier") {
+        dashboardPath = "/applicant/home";
+      }
+
+      const redirectParam =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("redirect")
+          : null;
+
+      const redirectPath = redirectParam || dashboardPath;
+
+      router.push(decodeURIComponent(redirectPath));
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

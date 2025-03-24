@@ -18,7 +18,7 @@ const Dashboard = () => {
     );
   }
   return (
-    <ProtectedRoute>
+    <ProtectedRoute userType="recruiter">
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-black">
         <div className="bg-white p-10 rounded-lg shadow-md text-center">
           <h1 className="text-2xl font-bold">Dashboard</h1>
