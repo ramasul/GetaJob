@@ -10,6 +10,7 @@ from app.config.db import Database
 from app.routes.applier_routes import router as applier_router
 from app.routes.recruiter_routes import router as recruiter_router
 from app.routes.auth_routes import router as auth_router
+from app.routes.job_routes import router as job_router
 
 load_dotenv()
 # Konfigurasi logging
@@ -38,6 +39,7 @@ app.add_middleware(
 app.include_router(applier_router)
 app.include_router(recruiter_router)
 app.include_router(auth_router)
+app.include_router(job_router)
 
 api_router = APIRouter()
 
