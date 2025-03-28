@@ -67,7 +67,7 @@ class ApplierUpdate(BaseModel):
     bio: Optional[str] = None
     profile_picture_url: Optional[str] = None
     resume_url: Optional[str] = None
-    update_url: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
     @validator("username")
     def username_cannot_be_email(cls, v):
         if v is not None:
