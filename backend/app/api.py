@@ -6,11 +6,13 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.db import Database
+from app.config.database_indexes import create_log_view_indexes
 
 from app.routes.applier_routes import router as applier_router
 from app.routes.recruiter_routes import router as recruiter_router
 from app.routes.auth_routes import router as auth_router
 from app.routes.job_routes import router as job_router
+from app.routes.logView_routes import router as log_view_router
 
 load_dotenv()
 # Konfigurasi logging
@@ -40,6 +42,7 @@ app.include_router(applier_router)
 app.include_router(recruiter_router)
 app.include_router(auth_router)
 app.include_router(job_router)
+app.include_router(log_view_router)
 
 api_router = APIRouter()
 
@@ -107,6 +110,12 @@ app.include_router(api_router)
 async def startup_db_client():
     db_url = os.getenv("MONGODB_URI")
     await Database.connect_db(db_url)
+
+    db = Database.get_db()
+    logger.info("Creating database indexes...")
+    await create_log_view_indexes(db)
+    logger.info("Database indexes created successfully")
+
     logger.info("Connected to the MongoDB database!")
 
 
