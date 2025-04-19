@@ -26,10 +26,10 @@ async def create_log_view_indexes(database: AsyncIOMotorDatabase):
         logger.info("Created compound index on applier_id and job_id fields in log_views collection")
         
         # Index untuk cluster_id (untuk rekomendasi berbasis cluster)
-        await database.applier.create_index([("cluster_id", 1)])
+        await database.appliers.create_index([("cluster_id", 1)])
         
         # Index untuk created_at (untuk query berdasarkan waktu pembuatan)
-        await database.job.create_index([("created_at", -1)])
+        await database.jobs.create_index([("created_at", -1)])
 
         logger.info("All indexes created successfully for log_views collection")
     except Exception as e:
