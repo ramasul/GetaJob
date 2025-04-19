@@ -4,6 +4,7 @@ from bson import ObjectId
 from collections import defaultdict, Counter
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from sklearn.cluster import DBSCAN, KMeans
+# from sklearn.decomposition import PCA
 from sklearn.metrics.pairwise import cosine_similarity
 
 from app.utils.constants import POPULAR_VIEWS_THRESHOLD
@@ -64,8 +65,14 @@ class RecommendationService:
                 return False
             
             user_matrix = np.vstack(user_vectors)
-            
+            # n_components = min(10, user_matrix.shape[1]) # Untuk implementasi PCA (Jika data banyak)
+            # pca = PCA(n_components=n_components)
+            # reduced_matrix = pca.fit_transform(user_matrix)
+            # logger.info(f"Reduced matrix: {reduced_matrix}")
+
+            # similarity_matrix = cosine_similarity(reduced_matrix)
             similarity_matrix = cosine_similarity(user_matrix)
+            # logger.info(f"Similarity matrix: {similarity_matrix}")
             distance_matrix = 1 - similarity_matrix
             
             clustering = DBSCAN(eps=eps, min_samples=min_samples, metric='precomputed')
@@ -125,8 +132,14 @@ class RecommendationService:
                 return False
             
             user_matrix = np.vstack(user_vectors)
+            # logger.info(f"User matrix: {user_matrix}")
+            # n_components = min(10, user_matrix.shape[1])
+            # pca = PCA(n_components=n_components)
+            # reduced_matrix = pca.fit_transform(user_matrix)
+            # logger.info(f"Reduced matrix: {reduced_matrix}")
             
             kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+            # clusters = kmeans.fit_predict(reduced_matrix)
             clusters = kmeans.fit_predict(user_matrix)
             
             for i, user_id in enumerate(user_ids):
