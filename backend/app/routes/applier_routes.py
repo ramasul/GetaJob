@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, status
 from app.config.db import Database
 from app.controllers.applier_controller import ApplierController
 from app.models.applier_model import ApplierCreate, ApplierUpdate, ApplierResponse
+from app.middleware.permissions import *
 
 router = APIRouter(prefix="/appliers", tags=["Appliers"])
 
@@ -63,7 +64,8 @@ async def get_applier_by_email(
 async def update_applier(
     applier_id: str,
     applier: ApplierUpdate,
-    controller: ApplierController = Depends(get_applier_controller)
+    controller: ApplierController = Depends(get_applier_controller),
+    user = Depends(owner_of("applier_id", "applier"))
 ):
     """Update data applier berdasarkan ID"""
     return await controller.update_applier(applier_id, applier)
