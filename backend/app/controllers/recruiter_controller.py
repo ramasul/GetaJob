@@ -119,7 +119,7 @@ class RecruiterController:
     async def update_recruiter(
         self, recruiter_id: str, update_data: RecruiterUpdate
     ) -> RecruiterResponse:
-        """Update a recruiter's information."""
+        """Update recruiter"""
         try:
             recruiter = await self.collection.find_one({"_id": ObjectId(recruiter_id)})
             if recruiter is None:

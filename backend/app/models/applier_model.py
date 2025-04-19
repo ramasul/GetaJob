@@ -67,7 +67,7 @@ class ApplierUpdate(BaseModel):
     bio: Optional[str] = None
     profile_picture_url: Optional[str] = None
     resume_url: Optional[str] = None
-    update_url: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
     @validator("username")
     def username_cannot_be_email(cls, v):
         if v is not None:
@@ -81,6 +81,7 @@ class ApplierUpdate(BaseModel):
 class ApplierInDB(ApplierBase):
     id: PyObjectId = Field(default_factory=lambda: str(ObjectId()), alias="_id") 
     password_hash: str
+    cluster_id: Optional[int] = None
     
     model_config = {
         "populate_by_name": True,

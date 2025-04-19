@@ -1,26 +1,67 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect} from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@auth/context";
 
 export default function Login() {
   const [formData, setFormData] = useState({
-    username: "",
+    identifier: "",
     password: "",
   });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("applier");
+  const { login, error, user } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (user) {
+      let dashboardPath = "/"; // default kalau ada apa apa
+
+      if (user.user_type === "recruiter") {
+        dashboardPath = "/recruiter/dashboard";
+      } else if (user.user_type === "applier") {
+        dashboardPath = "/applicant/home";
+      }
+
+      const redirectParam =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("redirect")
+          : null;
+
+      const redirectPath = redirectParam || dashboardPath;
+
+      router.push(decodeURIComponent(redirectPath));
+    }
+  }, [user, router]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // Handle form submission (e.g., API call, etc.)
     console.log(formData);
     console.log("User type:", activeTab);
+    setIsLoading(true);
+    try {
+      await login(formData.identifier, formData.password);
+
+      const redirectPath =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("redirect") ||
+            "/dashboard"
+          : "/dashboard";
+
+      router.push(decodeURIComponent(redirectPath));
+    } catch (err) {
+      console.error("Login failed", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -28,8 +69,8 @@ export default function Login() {
       <div className="w-[60vw] bg-white backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30">
         <div className=" p-6 flex items-center justify-center">
           {/* Logo and branding */}
-          <div className="flex flex-col items-center mb-6 w-[20vw]">
-          <Image
+          <div className="flex flex-col justify-center items-center w-[20vw] mx-auto">
+            <Image
               src="/image/3DHero.png"
               alt="Login"
               width={500}
@@ -68,14 +109,22 @@ export default function Login() {
 
             {/* Login form */}
             <form onSubmit={handleSubmit} className="w-[28vw] space-y-4">
+              {error && (
+                <div
+                  className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+                  role="alert"
+                >
+                  <span className="block sm:inline">{error}</span>
+                </div>
+              )}
               <div className="relative text-cyan-500">
                 <input
                   type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
+                  id="identifier"
+                  name="identifier"
+                  value={formData.identifier}
                   onChange={handleChange}
-                  placeholder="Username"
+                  placeholder="Username or Email"
                   className="w-full px-4 py-3 bg-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400 pl-10"
                   required
                 />
@@ -120,14 +169,18 @@ export default function Login() {
                     />
                   </svg>
                 </div>
-                
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white py-3 rounded-lg transition-colors duration-200 font-medium"
+                disabled={isLoading}
+                className={`w-full py-3 rounded-lg transition-colors duration-200 font-medium text-white ${
+                  isLoading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-cyan-500 hover:bg-cyan-600"
+                }`}
               >
-                Login
+                {isLoading ? "Logging in... wait" : "Login"}
               </button>
             </form>
 
