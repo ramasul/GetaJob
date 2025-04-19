@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, status
 
 from app.config.db import Database
-from app.recommendation.recommendation_service import RecommendationService
+from app.ai_services.recommendation_service import RecommendationService
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
