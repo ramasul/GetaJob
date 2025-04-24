@@ -1,23 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
+import axios from "axios";
+
 
 export default function JobSearch() {
-  // Sample job data
-  const jobs = Array(15)
-    .fill()
-    .map((_, i) => ({
-      id: i + 1,
-      title: "Data Analyst",
-      company: "Canva",
-      location: "Sleman, Yogyakarta",
-      salary: "IDR3.000.000/mo",
-      description:
-        "Canva is looking for Lead Engineer to help develop and orchestrate the visual and experience design of our products.",
-    }));
 
+  const [jobs, setJobs] = useState([]);
+
+  // Sample job data
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const response = await axios.get(
+          "https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/"
+        );
+
+        // Transform the response to match your desired structure
+        const transformedJobs = response.data.map((job, i) => ({
+          id: i + 1,
+          title: job.job_title,
+          company: job.company_name,
+          location: job.location,
+          salary: job.salary_range,
+          description: job.description,
+        }));
+
+        setJobs(transformedJobs);
+      } catch (error) {
+        console.error("Error fetching jobs:", error);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+  
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300">
       <Header currentPage="browse-companies" userType="applicant" />
