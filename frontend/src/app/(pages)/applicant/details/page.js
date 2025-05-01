@@ -1,10 +1,34 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
+import axios from "axios";
 
 export default function JobDetail() {
+  const company = {
+    title: "Nomad.Co",
+    image: "/image/map.png",
+    location: "Jl. Kaliurang Km. 5, Jl. Pandega Karya No.18A 6",
+    employeeQuantity: "4000+",
+    industry: "Social & Non-Profit",
+    email: "nomad@gmail.com",
+    phone: "+0274 0129141",
+    companyDescription:
+      "Nomad is a company that specializes in providing innovative solutions for remote work and digital nomad lifestyles. We are committed to creating a flexible and inclusive work environment that empowers individuals to thrive in their careers while enjoying the freedom of location independence.",
+  };
+
+  const job = {
+    title: "AI Engineer / Data Scientist",
+    description:
+      "We are looking for an AI Engineer to research and develop artificial intelligence products. We will work together in a team to transform business needs to production-ready deliverables. In this role, you should be highly analytical with a knack for deep learning, machine learning, mathematics, statistics, and software engineering. You are expected to have the skills of a Data Scientist and a Machine Learning Engineer. Additionally, you should have working knowledge and experience in either Computer Vision or NLP.",
+    requirements: [
+      "Conduct research to stay current with advances in the field of AI (especially computer vision and large language models (LLMs)) and apply new techniques to improve existing systems.",
+      "Collaborate with other roles (PM, SDE, SRE) to integrate AI (especially computer vision and large language models (LLMs)) systems into products and applications.",
+      "Solve complex problems using a data-driven approach.",
+    ],
+  };
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300">
       {/* Header/Navigation */}
@@ -18,7 +42,7 @@ export default function JobDetail() {
             <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-6">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-blue-600 mb-1">
-                  Nomad.Co
+                  {company.title}
                 </h2>
                 <div className="flex justify-center mb-4">
                   <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-white/50">
@@ -58,11 +82,7 @@ export default function JobDetail() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-gray-700">
-                      Jl. Kaliurang Km. 5, Jl. Pandega Karya No.18A 6,
-                      Caturtunggal, Kec. Depok, Kabupaten Sleman, Daerah
-                      Istimewa Yogyakarta 55281
-                    </p>
+                    <p className="text-sm text-gray-700">{company.location}</p>
                   </div>
                 </div>
 
@@ -84,7 +104,9 @@ export default function JobDetail() {
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-gray-700">Employees: 4000+</p>
+                    <p className="text-sm text-gray-700">
+                      Employees: {company.employeeQuantity}
+                    </p>
                   </div>
                 </div>
 
@@ -107,7 +129,7 @@ export default function JobDetail() {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-gray-700">
-                      Industry: Social & Non-Profit
+                      Industry: {company.industry}
                     </p>
                   </div>
                 </div>
@@ -131,7 +153,7 @@ export default function JobDetail() {
                       </svg>
                     </div>
                     <div className="ml-2">
-                      <p className="text-xs text-gray-700">nomad@gmail.com</p>
+                      <p className="text-xs text-gray-700">{company.email}</p>
                     </div>
                   </div>
 
@@ -153,7 +175,7 @@ export default function JobDetail() {
                       </svg>
                     </div>
                     <div className="ml-2">
-                      <p className="text-xs text-gray-700">+0274 0129141</p>
+                      <p className="text-xs text-gray-700">{company.phone}</p>
                     </div>
                   </div>
                 </div>
@@ -164,14 +186,7 @@ export default function JobDetail() {
                   About Company
                 </h3>
                 <p className="text-sm text-gray-700">
-                  Nomad is a software platform for starting and running internet
-                  businesses. Millions of users rely on Nomad's software tools
-                  to accept payments, expand globally, and manage their
-                  businesses online. Stripe has been at the forefront of
-                  expanding internet commerce, powering new business models and
-                  supporting the latest platforms, from marketplaces to mobile
-                  commerce sites. We believe that growing the GDP of the
-                  internet is a problem rooted in code and design, not finance.
+                  {company.companyDescription}
                 </p>
               </div>
             </div>
@@ -182,201 +197,37 @@ export default function JobDetail() {
             <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-6 mb-6">
               <div className="mb-6">
                 <h1 className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
-                  AI Engineer / Data Scientist
+                  {job.title}
                 </h1>
-                <p className="text-gray-700 mb-6">
-                  We are looking for an AI Engineer to research and develop
-                  artificial intelligence products. We will work together in a
-                  team to transform business needs to production-ready
-                  deliverables. In this role, you should be highly analytical
-                  with a knack for deep learning, machine learning, mathematics,
-                  statistics, and software engineering. You are expected to have
-                  the skills of a Data Scientist and a Machine Learning
-                  Engineer. Additionally, you should have working knowledge and
-                  experience in either Computer Vision or NLP.
-                </p>
+                <p className="text-gray-700 mb-6">{job.description}</p>
               </div>
 
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-blue-600 mb-4">
                   Requirement
                 </h2>
-                <ul className="space-y-2">
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Conduct research to stay current with advances in the
-                      field of AI (especially computer vision and large language
-                      models (LLMs)) and apply new techniques to improve
-                      existing systems.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Collaborate with other roles (PM, SDE, SRE) to integrate
-                      AI (especially computer vision and large language models
-                      (LLMs)) systems into products and applications.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Solve complex problems using a data-driven approach.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Produce clean and efficient code.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Verify and deploy programs and systems.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Identify valuable data sources and automate collection
-                      processes.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Integrate software components and third-party programs.
-                    </p>
-                  </li>
-                  <li className="flex items-start">
-                    <div className="flex-shrink-0 text-blue-500 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    </div>
-                    <p className="ml-2 text-gray-700">
-                      Create technical documentation for reference and
-                      reporting.
-                    </p>
-                  </li>
+                <ul className="space-y-3">
+                  {job.requirements.map((req, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="flex-shrink-0 text-blue-500 mt-1">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                      <p className="ml-2 text-gray-700">{req}</p>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
