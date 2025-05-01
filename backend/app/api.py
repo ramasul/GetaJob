@@ -134,4 +134,11 @@ if __name__ == "__main__":
     import uvicorn
     
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("app.api:app", host="0.0.0.0", port=port)
+    uvicorn.run(
+        "app.api:app",
+        host="0.0.0.0",
+        port=port,
+        workers=1,           # Stay on 1 worker (safe for low CPU)
+        loop="asyncio",      # Ensure event loop is async
+        timeout_keep_alive=5 # Optional: reduce idle connection time
+    )
