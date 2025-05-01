@@ -2,8 +2,48 @@
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, Instagram, Twitter, Globe, ChevronDown } from 'lucide-react';
+import {
+  ArrowLeft, Mail, Phone, Instagram, Twitter, Globe,
+} from 'lucide-react';
 import Header from '@/app/components/Header';
+
+// ⬇️ Dynamic applicant data object
+const applicant = {
+  name: "Jerome Paul",
+  title: "Product Designer",
+  avatar: "/images/jerome-bell.jpg",
+  rating: 4.0,
+  email: "jeromeBell45@email.com",
+  phone: "+44 1245 572 135",
+  social: {
+    instagram: "https://instagram.com/jeromebell",
+    twitter: "https://twitter.com/jeromebell",
+    website: "https://www.jeromebell.com",
+  },
+  appliedJob: {
+    position: "Product Development",
+    category: "Marketing",
+    type: "Full-Time",
+    appliedDate: "2 days ago",
+  },
+  personal: {
+    gender: "Male",
+    dob: "March 23, 1995",
+    age: "26 y.o",
+    language: "English, French, Bahasa",
+    address: ["4517 Washington Ave.", "Manchester, Kentucky 39495"],
+  },
+  professional: {
+    about: [
+      "I'm a product designer + filmmaker currently working remotely at Twitter from beautiful Manchester, United Kingdom.",
+      "For 10 years, I've specialised in interface, experience & interaction design...",
+    ],
+    currentJob: "Product Designer",
+    experienceYears: "4 Years",
+    qualification: "Bachelors in Engineering",
+    skills: ["Project Management", "Copywriting", "English"],
+  },
+};
 
 export default function ApplicantDetails() {
   return (
@@ -14,16 +54,9 @@ export default function ApplicantDetails() {
       </Head>
 
       <Header currentPage="dashboard" userType="recruiter" />
-        
-      
-      {/* Main Container */}
+
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        
-        {/* Header Navigation */}
-              
-        {/* Main Content */}
         <div className="p-6">
-          {/* Page Header */}
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
               <Link href="/applicants" className="mr-3">
@@ -31,178 +64,86 @@ export default function ApplicantDetails() {
               </Link>
               <h1 className="text-2xl font-bold text-gray-800">Applicant Details</h1>
             </div>
-
           </div>
-          
-          {/* Two Column Layout */}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Left Column - Profile Card */}
+            {/* Left Column */}
             <div className="bg-white p-6 rounded-xl border">
               <div className="flex flex-col items-center mb-4">
                 <div className="relative w-24 h-24 mb-3">
-                  <Image 
-                    src="/images/jerome-bell.jpg" 
-                    alt="Jerome Bell" 
-                    className="rounded-full object-cover"
-                    fill
-                  />
+                  <Image src={applicant.avatar} alt={applicant.name} fill className="rounded-full object-cover" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">Jerome Bell</h2>
-                <p className="text-gray-500">Product Designer</p>
+                <h2 className="text-xl font-bold text-gray-800">{applicant.name}</h2>
+                <p className="text-gray-500">{applicant.title}</p>
                 <div className="flex items-center mt-1">
                   <div className="text-yellow-400">★</div>
-                  <span className="ml-1 font-medium">4.0</span>
+                  <span className="ml-1 font-medium">{applicant.rating}</span>
                 </div>
               </div>
-              
+
               <div className="border-t pt-4 mb-6">
                 <div className="flex justify-between mb-1">
                   <span className="text-gray-700 font-medium">Applied Jobs</span>
-                  <span className="text-gray-500 text-sm">2 days ago</span>
+                  <span className="text-gray-500 text-sm">{applicant.appliedJob.appliedDate}</span>
                 </div>
                 <div className="mt-3">
-                  <h3 className="font-medium text-gray-800">Product Development</h3>
-                  <div className="flex gap-2 text-sm mt-1">
-                    <span className="text-gray-500">Marketing</span>
+                  <h3 className="font-medium text-gray-800">{applicant.appliedJob.position}</h3>
+                  <div className="flex gap-2 text-sm mt-1 text-gray-500">
+                    <span>{applicant.appliedJob.category}</span>
                     <span>•</span>
-                    <span className="text-gray-500">Full-Time</span>
+                    <span>{applicant.appliedJob.type}</span>
                   </div>
                 </div>
               </div>
-              
+
               <div className="border-t pt-4">
                 <h3 className="font-medium text-gray-800 mb-4">Contact</h3>
-                
                 <div className="space-y-4">
-                  <div className="flex items-start">
-                    <Mail className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div>
-                      <p className="text-gray-500 text-sm">Email</p>
-                      <a href="mailto:jeromeBell45@email.com" className="text-gray-800 text-sm hover:text-blue-600">
-                        jeromeBell45@email.com
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Phone className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div>
-                      <p className="text-gray-500 text-sm">Phone</p>
-                      <a href="tel:+441245572135" className="text-gray-800 text-sm hover:text-blue-600">
-                        +44 1245 572 135
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Instagram className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div>
-                      <p className="text-gray-500 text-sm">Instagram</p>
-                      <a href="https://instagram.com/jeromebell" className="text-blue-600 text-sm hover:underline">
-                        instagram.com/jeromebell
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Twitter className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div>
-                      <p className="text-gray-500 text-sm">Twitter</p>
-                      <a href="https://twitter.com/jeromebell" className="text-blue-600 text-sm hover:underline">
-                        twitter.com/jeromebell
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start">
-                    <Globe className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
-                    <div>
-                      <p className="text-gray-500 text-sm">Website</p>
-                      <a href="https://www.jeromebell.com" className="text-blue-600 text-sm hover:underline">
-                        www.jeromebell.com
-                      </a>
-                    </div>
-                  </div>
+                  <ContactItem icon={Mail} label="Email" value={applicant.email} href={`mailto:${applicant.email}`} />
+                  <ContactItem icon={Phone} label="Phone" value={applicant.phone} href={`tel:${applicant.phone}`} />
+                  <ContactItem icon={Instagram} label="Instagram" value={applicant.social.instagram} href={applicant.social.instagram} />
+                  <ContactItem icon={Twitter} label="Twitter" value={applicant.social.twitter} href={applicant.social.twitter} />
+                  <ContactItem icon={Globe} label="Website" value={applicant.social.website} href={applicant.social.website} />
                 </div>
               </div>
             </div>
-            
-            {/* Right Column - Detailed Information */}
+
+            {/* Right Column */}
             <div className="md:col-span-2">
               <div className="bg-white p-6 rounded-xl border mb-6">
                 <h3 className="font-medium text-gray-800 mb-4">Personal Info</h3>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Full Name</p>
-                    <p className="text-gray-800">Jerome Bell</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Gender</p>
-                    <p className="text-gray-800">Male</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Date of Birth</p>
-                    <p className="text-gray-800">March 23, 1995 <span className="text-gray-500 text-sm">(26 y.o)</span></p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Language</p>
-                    <p className="text-gray-800">English, French, Bahasa</p>
-                  </div>
-                  
+                  <Field label="Full Name" value={applicant.name} />
+                  <Field label="Gender" value={applicant.personal.gender} />
+                  <Field label="Date of Birth" value={`${applicant.personal.dob} (${applicant.personal.age})`} />
+                  <Field label="Language" value={applicant.personal.language} />
                   <div className="md:col-span-2">
-                    <p className="text-gray-500 text-sm mb-1">Address</p>
-                    <p className="text-gray-800">4517 Washington Ave.</p>
-                    <p className="text-gray-800">Manchester, Kentucky 39495</p>
+                    <Field label="Address" value={applicant.personal.address.join(", ")} />
                   </div>
                 </div>
               </div>
-              
+
               <div className="bg-white p-6 rounded-xl border">
                 <h3 className="font-medium text-gray-800 mb-4">Professional Info</h3>
-                
                 <div className="mb-6">
                   <p className="text-gray-500 text-sm mb-2">About Me</p>
-                  <p className="text-gray-700 mb-3">
-                    I'm a product designer + filmmaker currently working remotely at Twitter from beautiful Manchester, United Kingdom. I'm passionate about designing digital products that have a positive impact on the world.
-                  </p>
-                  <p className="text-gray-700">
-                    For 10 years, I've specialised in interface, experience & interaction design as well as working in user research and product strategy for product agencies, big tech companies & start-ups.
-                  </p>
+                  {applicant.professional.about.map((para, i) => (
+                    <p key={i} className="text-gray-700 mb-3">{para}</p>
+                  ))}
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Current Job</p>
-                    <p className="text-gray-800">Product Designer</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Experience in Years</p>
-                    <p className="text-gray-800">4 Years</p>
-                  </div>
-                  
-                  <div>
-                    <p className="text-gray-500 text-sm mb-1">Highest Qualification Held</p>
-                    <p className="text-gray-800">Bachelors in Engineering</p>
-                  </div>
-                  
+                  <Field label="Current Job" value={applicant.professional.currentJob} />
+                  <Field label="Experience in Years" value={applicant.professional.experienceYears} />
+                  <Field label="Highest Qualification Held" value={applicant.professional.qualification} />
                   <div>
                     <p className="text-gray-500 text-sm mb-1">Skill set</p>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
-                        Project Management
-                      </span>
-                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
-                        Copywriting
-                      </span>
-                      <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
-                        English
-                      </span>
+                      {applicant.professional.skills.map((skill, i) => (
+                        <span key={i} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
+                          {skill}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -210,6 +151,29 @@ export default function ApplicantDetails() {
             </div>
           </div>
         </div>
+      </div>  
+    </div>
+  );
+}
+
+// ⬇️ Reusable Components
+
+function Field({ label, value }) {
+  return (
+    <div>
+      <p className="text-gray-500 text-sm mb-1">{label}</p>
+      <p className="text-gray-800">{value}</p>
+    </div>
+  );
+}
+
+function ContactItem({ icon: Icon, label, value, href }) {
+  return (
+    <div className="flex items-start">
+      <Icon className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
+      <div>
+        <p className="text-gray-500 text-sm">{label}</p>
+        <a href={href} className="text-blue-600 text-sm hover:underline">{value}</a>
       </div>
     </div>
   );
