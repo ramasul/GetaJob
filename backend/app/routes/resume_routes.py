@@ -28,7 +28,7 @@ async def extract_text_from_pdf(
     OCR_result = await controller.ocr_space_file(temp_filename)
     OCR_result_clean = OCR_result.strip()
     parser = ResumeParser(text=OCR_result_clean)
-    result = parser.parse()
+    result = await parser.parse()
 
     os.remove(temp_filename)
 
@@ -45,7 +45,7 @@ async def parse_pdf_text(
         shutil.copyfileobj(file.file, buffer)
     
     controller = ResumeParser(filepath=temp_filename)
-    result = controller.parse()
+    result = await controller.parse()
 
     os.remove(temp_filename)
 
