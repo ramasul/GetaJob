@@ -1,5 +1,4 @@
 import httpx
-import requests
 
 class OCR:
     def __init__(self, api_key: str = 'helloworld', language: str = 'eng', overlay: bool = False):
