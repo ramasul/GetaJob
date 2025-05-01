@@ -47,12 +47,12 @@ class OCR:
         return: Result in JSON format.
         """
 
-        payload = {'url': url,
-                'isOverlayRequired': self.overlay,
-                'apikey': self.api_key,
-                'language': self.language,
+        payload = {
+            'url': url,
+            'isOverlayRequired': self.overlay,
+            'apikey': self.api_key,
+            'language': self.language,
                 }
-        r = requests.post('https://api.ocr.space/parse/image',
-                        data=payload,
-                        )
-        return r.content.decode()
+        async with httpx.AsyncClient() as client:
+            response = await client.post('https://api.ocr.space/parse/image', data=payload)
+            return response.text

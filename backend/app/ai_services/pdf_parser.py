@@ -51,7 +51,7 @@ class ResumeParser:
         except Exception as e:
             raise Exception(f"Error extracting text from PDF: {str(e)}")
 
-    def parse(self) -> ParserResponse:
+    async def parse(self) -> ParserResponse:
         """
         Fungsi Parsing Resume 
         
@@ -59,21 +59,21 @@ class ResumeParser:
             ParserResponse: Structured resume data
         """
         return ParserResponse(
-            personal_information=self._extract_personal_info(self.sections),
-            skills=self._clean_skill_section(),
-            achievements=self._clean_achievement_section(),
-            educations=self._clean_education_section(),
-            experiences=self._clean_experience_section()
+            personal_information=await self._extract_personal_info(self.sections),
+            skills=await self._clean_skill_section(),
+            achievements=await self._clean_achievement_section(),
+            educations=await self._clean_education_section(),
+            experiences=await self._clean_experience_section()
         )
     
-    def _clean_skill_section(self) -> List[ApplierSkills]:
+    async def _clean_skill_section(self) -> List[ApplierSkills]:
         skills_text = self._extract_section_content("skills", self.sections)
         if not skills_text:
             return []
         combined_text = "\n".join(skills_text)
 
         query = SKILL_PARSING_QUERY.format(resume_text=combined_text)
-        response = self.groq.get_response(query, temperature=0)
+        response = await self.groq.get_response(query, temperature=0)
 
         try:
             parsed = json.loads(response)
@@ -83,14 +83,14 @@ class ResumeParser:
             logger.error(f"Failed to parse skills JSON: {e}")
             return []
     
-    def _clean_achievement_section(self) -> List[ApplierAchievements]:
+    async def _clean_achievement_section(self) -> List[ApplierAchievements]:
         achievements_text = self._extract_section_content("achievements", self.sections)
         if not achievements_text:
             return []
         combined_text = "\n".join(achievements_text)
 
         query = ACHIEVEMENT_PARSING_QUERY.format(resume_text=combined_text)
-        response = self.groq.get_response(query, temperature=0)
+        response = await self.groq.get_response(query, temperature=0)
 
         try:
             parsed = json.loads(response)
@@ -100,14 +100,14 @@ class ResumeParser:
             logger.error(f"Failed to parse achievements JSON: {e}")
             return []
     
-    def _clean_education_section(self) -> List[ApplierEducation]:
+    async def _clean_education_section(self) -> List[ApplierEducation]:
         educations_text = self._extract_section_content("educations", self.sections)
         if not educations_text:
             return []
         combined_text = "\n".join(educations_text)
 
         query = EDUCATION_PARSING_QUERY.format(resume_text=combined_text)
-        response = self.groq.get_response(query, temperature=0)
+        response = await self.groq.get_response(query, temperature=0)
 
         try:
             parsed = json.loads(response)
@@ -124,14 +124,14 @@ class ResumeParser:
             logger.error(f"Failed to parse education JSON: {e}")
             return []
     
-    def _clean_experience_section(self) -> List[ApplierExperience]:
+    async def _clean_experience_section(self) -> List[ApplierExperience]:
         experiences_text = self._extract_section_content("experiences", self.sections)
         if not experiences_text:
             return []
         combined_text = "\n".join(experiences_text)
 
         query = EXPERIENCE_PARSING_QUERY.format(resume_text=combined_text)
-        response = self.groq.get_response(query, temperature=0)
+        response = await self.groq.get_response(query, temperature=0)
 
         try:
             parsed = json.loads(response)
@@ -223,7 +223,7 @@ class ResumeParser:
         
         return sections
 
-    def _extract_personal_info(self, sections: dict) -> PersonalInformation:
+    async def _extract_personal_info(self, sections: dict) -> PersonalInformation:
         """
         Ekstrak informasi pribadi dari bagian resume yang sesuai.
         
@@ -272,8 +272,8 @@ class ResumeParser:
         
         location = self._extract_location(personal_text)
 
-        description = self.groq.get_response(DESCRIPTION_PARSING_QUERY.format(resume_text=description), temperature=0)
-        location = self.groq.get_response(LOCATION_PARSING_QUERY.format(resume_text=location), temperature=0)
+        description = await self.groq.get_response(DESCRIPTION_PARSING_QUERY.format(resume_text=description), temperature=0)
+        location = await self.groq.get_response(LOCATION_PARSING_QUERY.format(resume_text=location), temperature=0)
 
         return PersonalInformation(
             name=name,
