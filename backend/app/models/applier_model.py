@@ -5,6 +5,8 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, EmailStr, field_validator, validator
 from email_validator import validate_email, EmailNotValidError
 
+from app.models.resume_model import ParserResponse
+
 # Kalau misal ada field yang tidak wajib diisi, bisa ditambahkan Optional
 # Kalau misal ada elemen yang punya banyak field, bisa dibuat class baru
 # Misalnya, Address punya banyak field, jadi kita buat class Address 
@@ -35,6 +37,7 @@ class ApplierBase(BaseModel):
     last_education: Education
     bio: Optional[str] = None
     resume_url: Optional[str] = None
+    resume_parsed: Optional[ParserResponse] = None
     profile_picture_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException, status
 from app.config.db import Database
 from app.controllers.applier_controller import ApplierController
 from app.models.applier_model import ApplierCreate, ApplierUpdate, ApplierResponse
+from app.models.resume_model import ResumeDeleteOptions, ResumeUpdate
 from app.middleware.permissions import *
 
 router = APIRouter(prefix="/appliers", tags=["Appliers"])
@@ -69,6 +70,26 @@ async def update_applier(
 ):
     """Update data applier berdasarkan ID"""
     return await controller.update_applier(applier_id, applier)
+
+@router.put("/{applier_id}/update-resume", status_code=status.HTTP_200_OK)
+async def update_applier_resume(
+    applier_id: str,
+    resume: ResumeUpdate,
+    controller: ApplierController = Depends(get_applier_controller),
+    user = Depends(owner_of("applier_id", "applier"))
+):
+    """API untuk memperbarui resume applier berdasarkan ID"""
+    return await controller.update_resume(applier_id, resume)
+
+@router.put("/{applier_id}/delete-resume-components", status_code=status.HTTP_200_OK)
+async def delete_applier_resume_components(
+    applier_id: str,
+    delete_options: ResumeDeleteOptions,
+    controller: ApplierController = Depends(get_applier_controller),
+    user = Depends(owner_of("applier_id", "applier"))
+):
+    """API untuk menghapus komponen resume (URL atau data parsed) dari profil applier"""
+    return await controller.delete_resume_components(applier_id, delete_options)
 
 @router.post("/{applier_id}/change-password", status_code=status.HTTP_200_OK)
 async def change_password(

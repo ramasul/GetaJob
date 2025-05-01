@@ -7,6 +7,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import HTTPException, status
 
 from app.models.applier_model import ApplierCreate, ApplierUpdate, ApplierInDB, ApplierResponse
+from app.models.resume_model import ResumeUpdate, ResumeDeleteOptions
 from app.utils.common_fn import convert_date_to_datetime
 from app.utils.auth_helper import get_password_hash, verify_password
 
@@ -189,6 +190,49 @@ class ApplierController:
                 detail=f"Error updating applier: {str(e)}"
             )
         
+    async def update_resume(self, applier_id: str, update_data: ResumeUpdate) -> ApplierResponse:
+        """Update an applier's resume information."""
+        try:
+            applier = await self.collection.find_one({"_id": ObjectId(applier_id)})
+            if applier is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Applier with ID {applier_id} not found"
+                )
+                       
+            update_dict = update_data.model_dump(exclude_unset=True)
+            update_dict["updated_at"] = datetime.now()
+            
+            if not update_dict:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No fields to update"
+                )
+            
+            result = await self.collection.update_one(
+                {"_id": ObjectId(applier_id)},
+                {"$set": update_dict}
+            )
+            
+            if result.modified_count == 0 and result.matched_count == 1:
+                pass
+            elif result.modified_count == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update applier"
+                )
+            
+            updated_applier = await self.collection.find_one({"_id": ObjectId(applier_id)})
+            updated_applier["_id"] = str(updated_applier["_id"])
+            return ApplierResponse(**updated_applier)
+            
+        except Exception as e:
+            logger.error(f"Error updating applier: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error updating applier: {str(e)}"
+            )
+        
     async def change_password(self, applier_id: str, current_password: str, new_password: str) -> bool:
         """Ubah password applier menggunakan password lama dan password baru."""
         try:
@@ -265,6 +309,54 @@ class ApplierController:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error deleting applier: {str(e)}"
+            )
+
+    async def delete_resume_components(self, applier_id: str, delete_options: ResumeDeleteOptions) -> ApplierResponse:
+        """Delete specific resume components from an applier's profile."""
+        try:
+            applier = await self.collection.find_one({"_id": ObjectId(applier_id)})
+            if applier is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Applier with ID {applier_id} not found"
+                )
+            
+            update_dict = {"updated_at": datetime.now()}
+            
+            if delete_options.delete_resume_url:
+                update_dict["resume_url"] = None
+            
+            if delete_options.delete_resume_parsed:
+                update_dict["resume_parsed"] = None
+            
+            if len(update_dict) == 1:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="No fields selected for deletion"
+                )
+            
+            result = await self.collection.update_one(
+                {"_id": ObjectId(applier_id)},
+                {"$set": update_dict}
+            )
+            
+            if result.modified_count == 0 and result.matched_count == 1:
+                pass
+            elif result.modified_count == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to update applier"
+                )
+            
+            updated_applier = await self.collection.find_one({"_id": ObjectId(applier_id)})
+            updated_applier["_id"] = str(updated_applier["_id"])
+            return ApplierResponse(**updated_applier)
+            
+        except Exception as e:
+            logger.error(f"Error deleting resume components: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error deleting resume components: {str(e)}"
             )
 
     async def search_appliers(self, query: dict, skip: int = 0, limit: int = 100) -> List[ApplierResponse]:
