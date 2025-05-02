@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List
+from datetime import datetime
 
 class PersonalInformation(BaseModel):
     name: str = Field(default="")
@@ -32,8 +33,18 @@ class ApplierExperience(BaseModel):
     responsibilities: Optional[List[str]] = Field(default_factory=list)
 
 class ParserResponse(BaseModel):
-    personal_information: PersonalInformation
+    personal_information: PersonalInformation = Field(default_factory=PersonalInformation)
     skills: List[ApplierSkills] = Field(default_factory=list)
     achievements: List[ApplierAchievements] = Field(default_factory=list)
     educations: List[ApplierEducation] = Field(default_factory=list)
     experiences: List[ApplierExperience] = Field(default_factory=list)
+
+class ResumeUpdate(BaseModel):
+    resume_url: Optional[str] = None
+    resume_parsed: Optional[ParserResponse] = None
+    updated_at: datetime = Field(default_factory=datetime.now)
+
+class ResumeDeleteOptions(BaseModel):
+    delete_resume_url: bool = False
+    delete_resume_parsed: bool = False
+    updated_at: datetime = Field(default_factory=datetime.now)
