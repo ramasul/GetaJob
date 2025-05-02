@@ -2,25 +2,26 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import axios from "axios";
+import axiosInstance from "@/app/utils/api";
 
 
 export default function JobSearch() {
 
   const [jobs, setJobs] = useState([]);
+  const router = useRouter();
 
   // Sample job data
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await axios.get(
-          "https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/"
-        );
+        const response = await axiosInstance.get("/jobs");
 
         // Transform the response to match your desired structure
         const transformedJobs = response.data.map((job, i) => ({
-          id: i + 1,
+          id: job._id,
           title: job.job_title,
           company: job.company_name,
           location: job.location,
@@ -143,6 +144,7 @@ export default function JobSearch() {
             {jobs.map((job) => (
               <div
                 key={job.id}
+                onClick={() => router.push(`/applicant/details/${job.id}`)}
                 className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-4 hover:shadow-xl transition-shadow duration-200"
               >
                 <div className="flex items-start mb-4">

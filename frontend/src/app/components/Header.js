@@ -9,7 +9,7 @@ export default function Header({ currentPage, userType }) {
           { name: "Dashboard", href: "/recruiter/dashboard", key: "dashboard" },
         ]
       : [
-          { name: "Profile", href: "/profile", key: "profile" },
+          { name: "Profile", href: "/applicant/profile", key: "profile" },
           { name: "Browse Companies", href: "/applicant/home", key: "browse-companies" },
         ];
 
