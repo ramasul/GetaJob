@@ -1,23 +1,47 @@
 "use client";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function Header({ currentPage, userType }) {
   // Define menu items based on user type
   const menuItems =
     userType === "recruiter"
       ? [
-          { name: "Company Profile", href: "/company-profile", key: "company-profile" },
+          {
+            name: "Company Profile",
+            href: "/company-profile",
+            key: "company-profile",
+          },
           { name: "Dashboard", href: "/recruiter/dashboard", key: "dashboard" },
         ]
       : [
           { name: "Profile", href: "/applicant/profile", key: "profile" },
-          { name: "Browse Companies", href: "/applicant/home", key: "browse-companies" },
+          {
+            name: "Browse Companies",
+            href: "/applicant/home",
+            key: "browse-companies",
+          },
         ];
+
+  const handleLogout = () => {
+    // Clear cookies (customize keys as needed)
+    Cookies.remove("token");
+    Cookies.remove("session");
+
+    // Optionally clear localStorage/sessionStorage
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Redirect to homepage
+    router.push("/");
+  };
 
   return (
     <div className="px-6 py-4">
       <div className="w-full max-w-6xl mx-auto bg-white/20 backdrop-blur-md rounded-full shadow-lg py-2 px-4">
-        <div className="flex items-center">
-          <div className="flex items-center mr-6">
+        <div className="flex items-center justify-between">
+          {/* Left side: Logo and Nav */}
+          <div className="flex items-center">
             <div className="bg-blue-500 rounded-full p-2 mr-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -40,14 +64,29 @@ export default function Header({ currentPage, userType }) {
                   key={item.key}
                   href={item.href}
                   className={`${
-                    currentPage === item.key ? "text-blue-600 font-bold" : "text-gray-700"
-                  } ${currentPage === "browse-companies" && item.key === "browse-companies" ? "text-blue-600" : ""}`}
+                    currentPage === item.key
+                      ? "text-blue-600 font-bold"
+                      : "text-gray-700"
+                  } ${
+                    currentPage === "browse-companies" &&
+                    item.key === "browse-companies"
+                      ? "text-blue-600"
+                      : ""
+                  }`}
                 >
                   {item.name}
                 </a>
               ))}
             </nav>
           </div>
+
+          {/* Right side: Logout */}
+          <button
+            onClick={handleLogout} // Replace with real logout logic
+            className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full transition-colors duration-150"
+          >
+            Logout
+          </button>
         </div>
       </div>
     </div>
