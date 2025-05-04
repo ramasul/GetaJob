@@ -1,10 +1,10 @@
 "use client";
 import Cookies from "js-cookie";
-import { useAuth } from "@auth/context";
+// import { useAuth } from "@auth/context";
 
 export default function Header({ currentPage, userType }) {
 
-  const {logout} = useAuth()
+  // const {logout} = useAuth()
   // Define menu items based on user type
   const menuItems =
     userType === "recruiter"
@@ -85,7 +85,7 @@ export default function Header({ currentPage, userType }) {
 
           {/* Right side: Logout */}
           <button
-            onClick= {logout()} // Replace with real logout logic
+            // onClick= {logout()} // Replace with real logout logic
             className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full transition-colors duration-150"
           >
             Log out
