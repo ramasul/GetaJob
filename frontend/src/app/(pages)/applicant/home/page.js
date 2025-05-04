@@ -56,12 +56,12 @@ export default function JobSearch() {
             </p>
 
             {/* Search Form */}
-            <div className="flex flex-row  sm:items-center bg-white h-[4.5vw] rounded-[0.7vw] 2xl:scale-[0.5]">
+            <div className="flex flex-row  items-center bg-white h-[4.5vw] rounded-[0.7vw] ">
               <div className="relative flex h-[3vw] border border-gray-300 rounded-md mx-[0.5vw]">
-                <div className="mx-[1vw]  flex items-center pointer-events-none">
+                <div className=" flex items-center pointer-events-none w-[0vw]">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-blue-500"
+                    className="h-5 w-5 text-blue-500 absolute right-[1vw]"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -77,11 +77,12 @@ export default function JobSearch() {
                 <input
                   type="text"
                   placeholder="Job title, Keyword..."
-                  className="w-[15vw] px-[1vw] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                  className="px-[1vw] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black w-[30vw]"
                 />
               </div>
 
-              <div className="relative flex h-[3vw] border border-gray-300 rounded-md mx-[0.5vw]">
+              {/* Location Search bar */}
+              {/* <div className="relative flex h-[3vw] border border-gray-300 rounded-md mx-[0.5vw]">
                 <div className="mx-[1vw]  flex items-center pointer-events-none">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +110,7 @@ export default function JobSearch() {
                   placeholder="Your Location"
                   className="w-[10vw] px-[1vw]  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 />
-              </div>
+              </div> */}
 
               <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-200 mx-[0.5vw] w-[8vw]">
                 Find Job

@@ -84,7 +84,8 @@ export default function Login() {
           </div>
 
           <div className=" flex flex-col w-[30vw] items-center justify-center">
-            <div className="flex w-full max-w-xs mb-6 bg-white/30 rounded-full p-1 border border-cyan-500">
+            {/* Toggle Applier/Recruiter */}
+            {/* <div className="flex w-full max-w-xs mb-6 bg-white/30 rounded-full p-1 border border-cyan-500">
               <button
                 onClick={() => setActiveTab("applier")}
                 className={`py-2 px-4 w-1/2 rounded-full text-sm font-medium transition-all duration-200 ${
@@ -105,7 +106,7 @@ export default function Login() {
               >
                 Recruiter
               </button>
-            </div>
+            </div> */}
 
             {/* Login form */}
             <form onSubmit={handleSubmit} className="w-[28vw] space-y-4">

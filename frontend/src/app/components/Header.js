@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 export default function Header({ currentPage, userType }) {
+  const router = useRouter();
   // Define menu items based on user type
   const menuItems =
     userType === "recruiter"
@@ -24,18 +25,18 @@ export default function Header({ currentPage, userType }) {
         ];
 
   const handleLogout = () => {
-    // Clear cookies (customize keys as needed)
-    Cookies.remove("token");
-    Cookies.remove("session");
+    // Explicitly remove cookies with path
+    Cookies.remove("access_token", { path: "/" });
+    Cookies.remove("refresh_token", { path: "/" });
+    Cookies.remove("session", { path: "/" });
 
-    // Optionally clear localStorage/sessionStorage
+    // Optional: clear storage
     localStorage.clear();
     sessionStorage.clear();
 
-    // Redirect to homepage
+    // Redirect
     router.push("/");
   };
-
   return (
     <div className="px-6 py-4">
       <div className="w-full max-w-6xl mx-auto bg-white/20 backdrop-blur-md rounded-full shadow-lg py-2 px-4">
