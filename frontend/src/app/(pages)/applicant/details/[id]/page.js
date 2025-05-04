@@ -219,8 +219,8 @@ export default function JobDetail() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  <div className="flex items-center bg-white/40 rounded-lg p-2">
+                <div className="grid gap-2 mt-4">
+                  <div className="flex justify-center items-center bg-white/40 rounded-lg p-2">
                     <div className="flex-shrink-0 text-blue-500">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -242,7 +242,7 @@ export default function JobDetail() {
                     </div>
                   </div>
 
-                  <div className="flex items-center bg-white/40 rounded-lg p-2">
+                  <div className="flex justify-center items-center bg-white/40 rounded-lg p-2">
                     <div className="flex-shrink-0 text-blue-500">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
