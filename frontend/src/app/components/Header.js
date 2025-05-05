@@ -30,12 +30,12 @@ export default function Header({ currentPage, userType }) {
   };
 
   return (
-    <div className="px-6 py-4">
-      <div className="w-full max-w-6xl mx-auto bg-white/20 backdrop-blur-md rounded-full shadow-lg py-2 px-4">
+    <div className="px-[3vw] py-[1.5vw]">
+      <div className="w-full mx-auto bg-white/20 backdrop-blur-md rounded-full shadow-lg py-[0.75vw] px-[2vw]">
         <div className="flex items-center justify-between">
           {/* Left side: Logo and Nav */}
           <div className="flex items-center">
-            <div className="bg-blue-500 rounded-full p-2 mr-2">
+            <div className="bg-blue-500 rounded-full p-[0.7vw] mr-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6 text-white"
@@ -51,7 +51,7 @@ export default function Header({ currentPage, userType }) {
                 />
               </svg>
             </div>
-            <nav className="text-sm font-medium flex space-x-4 px-[2vw]">
+            <nav className="text-[1.2vw] font-medium flex space-x-[1vw] px-[2vw]">
               {menuItems.map((item) => (
                 <a
                   key={item.key}
@@ -76,7 +76,7 @@ export default function Header({ currentPage, userType }) {
           {/* Right side: Logout */}
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full transition-colors duration-150"
+            className="bg-red-500 hover:bg-red-600 text-white text-[1.2vw]  font-semibold px-[1.7vw] py-[0.6vw] rounded-full transition-colors duration-150"
           >
             Log out
           </button>

@@ -42,15 +42,15 @@ export default function JobSearch() {
     <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300">
       <Header currentPage="browse-companies" userType="applicant" />
       {/* Hero Section */}
-      <div className="px-6 py-8">
-        <div className="w-[80vw] mx-auto flex flex-row items-center xl: min-2xl:scale-[0.75]">
+      <div className="px-[2vw] py-[1.2vw]">
+        <div className="w-[80vw] mx-auto flex flex-row items-center ">
           <div className="items-center justify-center">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-blue-600 mb-4">
+            <h1 className="text-[4vw]/[4.3vw] font-bold text-blue-600 mb-[1vw]">
               Find a job that suits
               <br />
               your interest & skills.
             </h1>
-            <p className="text-blue-800 opacity-80 mb-8 max-w-lg">
+            <p className="text-[1.5vw]/[1.7vw] text-blue-800 opacity-80 mb-[2vw] w-[40vw]">
               Aliquam vitae turpis in diam conguis finibus id at risus. Nullam
               in scelerisque leo, eget sollicitudin velit vestibulum.
             </p>
@@ -77,7 +77,7 @@ export default function JobSearch() {
                 <input
                   type="text"
                   placeholder="Job title, Keyword..."
-                  className="px-[1vw] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black w-[30vw]"
+                  className="px-[1vw] text-[1.2vw] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black w-[30vw]"
                 />
               </div>
 
@@ -112,29 +112,23 @@ export default function JobSearch() {
                 />
               </div> */}
 
-              <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors duration-200 mx-[0.5vw] w-[8vw]">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white text-[1.1vw] py-[0.6vw] px-[1.2vw] rounded-md transition-colors duration-200 mx-[0.5vw] w-[8vw]">
                 Find Job
               </button>
             </div>
           </div>
 
           <div className="mx-auto flex justify-center">
-            <div className="relative w-[20vw] h-64">
-              <div className="absolute top-0 left-0 w-full h-full flex justify-center">
-                <div className="relative">
-                  <div className="relative">
+          <div className="relative">
                     <Image
                       src="/image/3DHero.png"
                       alt="Job Search"
                       width={250}
                       height={250}
-                      className="relative z-10"
+                      className="relative z-10 w-[20vw]"
                       priority
                     />
                   </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
