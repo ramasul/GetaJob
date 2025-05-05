@@ -1,11 +1,10 @@
 "use client";
-import Cookies from "js-cookie";
-// import { useAuth } from "@auth/context";
+import { useAuth } from "@auth/context";
+import { useRouter } from "next/navigation";
 
 export default function Header({ currentPage, userType }) {
-
-  // const {logout} = useAuth()
-  // Define menu items based on user type
+  const { logout } = useAuth();
+  const router = useRouter();
   const menuItems =
     userType === "recruiter"
       ? [
@@ -25,19 +24,10 @@ export default function Header({ currentPage, userType }) {
           },
         ];
 
-  // const handleLogout = () => {
-  //   // Explicitly remove cookies with path
-  //   Cookies.remove("access_token", { path: "/" });
-  //   Cookies.remove("refresh_token", { path: "/" });
-  //   Cookies.remove("session", { path: "/" });
-
-  //   // Optional: clear storage
-  //   localStorage.clear();
-  //   sessionStorage.clear();
-
-  //   // Redirect
-  //   router.push("/");
-  // };
+  const handleLogout = async () => {
+    await logout();
+    router.push("/");
+  };
 
   return (
     <div className="px-6 py-4">
@@ -85,7 +75,7 @@ export default function Header({ currentPage, userType }) {
 
           {/* Right side: Logout */}
           <button
-            // onClick= {logout()} // Replace with real logout logic
+            onClick={handleLogout}
             className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full transition-colors duration-150"
           >
             Log out
