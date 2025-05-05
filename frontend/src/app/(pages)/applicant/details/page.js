@@ -6,6 +6,8 @@ import Header from "@/app/components/Header";
 import axios from "axios";
 
 export default function JobDetail() {
+
+  
   const company = {
     title: "Nomad.Co",
     image: "/image/map.png",
