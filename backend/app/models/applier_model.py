@@ -12,17 +12,17 @@ from app.models.resume_model import ParserResponse
 # Misalnya, Address punya banyak field, jadi kita buat class Address 
 class Education(BaseModel):
     education_level: str
-    institution: Optional[str]
-    degree: Optional[str]
-    field_of_study: Optional[str]
-    graduation_year: Optional[int]
+    institution: Optional[str] = None
+    degree: Optional[str] = None
+    field_of_study: Optional[str] = None
+    graduation_year: Optional[int] = None
 
 class Address(BaseModel):
-    street: Optional[str]
-    city: Optional[str]
+    street: Optional[str] = None
+    city: Optional[str] = None
     state: str
     country: Optional[str] = "Indonesia"
-    postal_code: Optional[str]
+    postal_code: Optional[str] = None
 
 # ApplierBase adalah class yang default yang akan digunakan untuk membuat data
 # Password tidak dimasukkan
