@@ -179,7 +179,7 @@ export default function Login() {
                   isLoading
                     ? "bg-cyan-400 cursor-not-allowed"
                     : "bg-cyan-500 hover:bg-cyan-600"
-                } disables:cursor-not-allowed cursor-pointer`}
+                } disabled:cursor-not-allowed cursor-pointer`}
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center">
