@@ -5,12 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field, EmailStr, validator
 from email_validator import validate_email, EmailNotValidError
 
-class Address(BaseModel):
-    street: Optional[str]
-    city: Optional[str]
-    state: str
-    country: Optional[str] = "Indonesia"
-    postal_code: Optional[str]
+from app.models.applier_model import Address
 
 class RecruiterBase(BaseModel):
     username: str
