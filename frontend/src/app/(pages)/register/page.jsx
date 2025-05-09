@@ -10,11 +10,11 @@ export default function Register() {
   const [hoverRecruiter, setHoverRecruiter] = useState(false);
 
   const handleApplierClick = () => {
-    router.push("/test/applier/register");
+    router.push("/register/applier");
   };
 
   const handleRecruiterClick = () => {
-    router.push("/test/register/");
+    router.push("/register/recruiter");
   };
 
   return (
