@@ -207,7 +207,7 @@ export default function RegisterStepOne({
           <p className="text-xs sm:text-sm text-cyan-800 mt-2 sm:mt-3 text-center">
             Registrating as a recruiter?{" "}
             <a
-              href="/login"
+              href="/register/recruiter"
               className="text-cyan-600 hover:underline font-medium"
             >
               Click here
