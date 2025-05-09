@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import RegisterStepOne from "@/app/components/register/RegisterStepOne";
-import RegisterStepTwo from "@/app/components/register/RegisterStepTwo";
+import RegisterStepOne from "@/app/components/register/applier/RegisterStepOne";
+import RegisterStepTwo from "@/app/components/register/applier/RegisterStepTwo";
 import { applierService } from "@/app/api/applierService";
 import { useAuth } from "@auth/context";
 import Loading from "@/app/components/Loading";
