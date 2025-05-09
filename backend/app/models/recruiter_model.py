@@ -21,6 +21,7 @@ class RecruiterBase(BaseModel):
     phone: Optional[str] = None
     address: Optional[Address] = None
     website_url: Optional[str] = None
+    profile_picture_url: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
     @validator("username")
@@ -45,6 +46,7 @@ class RecruiterUpdate(BaseModel):
     phone: Optional[str] = None
     address: Optional[Address] = None
     website_url: Optional[str] = None
+    profile_picture_url: Optional[str] = None
     updated_at: datetime = Field(default_factory=datetime.now)
     @validator("username")
     def username_cannot_be_email(cls, v):
