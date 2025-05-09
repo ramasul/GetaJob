@@ -96,4 +96,95 @@ export const applierService = {
       }
     }
   },
+
+  async getAllAppliers(page, applier_per_page) {
+    try {
+      skip = (page - 1) * applier_per_page;
+      const response = await api.get("/appliers/", {
+        params: {
+          skip: skip,
+          limit: applier_per_page,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching appliers:", error);
+      throw error;
+    }
+  },
+
+  async getApplierByID(applier_id) {
+    try {
+      const response = await api.get(`/appliers/${applier_id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching applier by ID:", error);
+      throw error;
+    }
+  },
+
+  async updateProfile(applier_id, profileData) {
+    try {
+      const cleanedData = cleanEmptyValues(profileData);
+      const response = await api.put(
+        `/appliers/${applier_id}`,
+        JSON.stringify(cleanedData)
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      throw error;
+    }
+  },
+
+  //PLIS JANGAN PAKE DELETE INI DULU BELUM DIHANDLE SOALNYA
+  async deleteApplier(applier_id) {
+    try {
+      const response = await api.delete(`/appliers/${applier_id}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting applier:", error);
+      throw error;
+    }
+  },
+
+  async updateResume(applier_id, resumeData) {
+    try {
+      const cleanedData = cleanEmptyValues(resumeData);
+      const response = await api.put(
+        `/appliers/${applier_id}/update-resume`,
+        JSON.stringify(cleanedData)
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating resume:", error);
+      throw error;
+    }
+  },
+
+  async deleteResumeComponents(applier_id, component) {
+    try {
+      const cleanedData = cleanEmptyValues(component);
+      const response = await api.put(
+        `/appliers/${applier_id}/delete-resume-components`,
+        JSON.stringify(cleanedData)
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting resume components:", error);
+      throw error;
+    }
+  },
+
+  async changePassword(applier_id, passwordData) {
+    try {
+      const response = await api.post(
+        `/appliers/${applier_id}/change-password`,
+        JSON.stringify(passwordData)
+      );
+    } catch (error) {
+      console.error("Error changing password:", error);
+      throw error;
+    }
+  },
 };
