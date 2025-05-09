@@ -82,13 +82,13 @@ export default function Register() {
                     >
                       <Image
                         src="/image/3DHero.png?height=100&width=100"
-                        alt="Job Seeker"
+                        alt="Applier"
                         fill
                         className="object-contain"
                       />
                     </div>
                     <span className="text-lg font-medium text-cyan-700 mb-1">
-                      Job Seeker
+                      Applier
                     </span>
                     <span className="text-xs text-cyan-500 text-center">
                       Find opportunities that match your skills
