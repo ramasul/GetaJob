@@ -26,7 +26,7 @@ export default function Header({ currentPage, userType }) {
 
   const handleLogout = async () => {
     await logout();
-    router.push("/");
+    router.push("/login");
   };
 
   return (
@@ -76,7 +76,7 @@ export default function Header({ currentPage, userType }) {
           {/* Right side: Logout */}
           <button
             onClick={handleLogout}
-            className="bg-red-500 hover:bg-red-600 text-white text-[1.2vw]  font-semibold px-[1.7vw] py-[0.6vw] rounded-full transition-colors duration-150"
+            className="bg-red-500 hover:bg-red-600 text-white text-[1.2vw]  font-semibold px-[1.7vw] py-[0.6vw] rounded-full transition-colors duration-150 cursor-pointer"
           >
             Log out
           </button>
