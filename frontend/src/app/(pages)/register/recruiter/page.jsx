@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import RegisterStepOne from "@/app/components/register/applier/RegisterStepOne";
-import RegisterStepTwo from "@/app/components/register/applier/RegisterStepTwo";
-import { applierService } from "@/app/api/applierService";
+import RegisterStepOne from "@/app/components/register/recruiter/RegisterStepOne";
+import RegisterStepTwo from "@/app/components/register/recruiter/RegisterStepTwo";
+import { recruiterService } from "@/app/api/recruiterService";
 import { useAuth } from "@auth/context";
 import Loading from "@/app/components/Loading";
 
@@ -17,7 +17,9 @@ export default function RegisterPage() {
     email: "",
     password: "",
     // Step 2
-    name: "",
+    company_name: "",
+    company_type: "",
+    company_description: "",
     phone: "",
     address: {
       street: "",
@@ -26,15 +28,7 @@ export default function RegisterPage() {
       country: "Indonesia",
       postal_code: "",
     },
-    dob: "",
-    last_education: {
-      education_level: "",
-      institution: "",
-      degree: "",
-      field_of_study: "",
-      graduation_year: null,
-    },
-    bio: "",
+    website_url: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -72,12 +66,9 @@ export default function RegisterPage() {
       // Format date for backend (YYYY-MM-DD)
       const formattedData = {
         ...dataToSubmit,
-        dob: dataToSubmit.dob
-          ? new Date(dataToSubmit.dob).toISOString().split("T")[0]
-          : "",
       };
 
-      const response = await applierService.register(formattedData);
+      const response = await recruiterService.register(formattedData);
       await login(formData.username, formData.password);
       router.push("/login?register=success");
     } catch (err) {
@@ -116,12 +107,12 @@ export default function RegisterPage() {
               fields.some(
                 (field) =>
                   [
-                    "name",
+                    "company_name",
+                    "company_type",
+                    "company_description",
                     "phone",
-                    "dob",
-                    "bio",
+                    "website_url",
                     "address",
-                    "last_education",
                   ].includes(field) ||
                   field.startsWith("address.") ||
                   field.startsWith("last_education.")
@@ -174,7 +165,7 @@ export default function RegisterPage() {
           <div className="mb-6 sm:mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
               <h1 className="text-xl sm:text-2xl font-bold text-cyan-700">
-                Create Your Account (Applier)
+                Create Your Account (Recruiter)
               </h1>
               <div className="text-sm text-cyan-600">Step {step} of 2</div>
             </div>
