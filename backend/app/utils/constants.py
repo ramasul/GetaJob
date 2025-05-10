@@ -721,3 +721,113 @@ LOCATION_KEYWORDS = [
             "jakarta selatan", "jakarta barat", "jakarta timur", "jakarta utara",
         ]
 
+RECRUITER_RATE_RESUME_QUERY = """
+You are an AI assistant helping recruiters evaluate applicants. Given the resume data and job details below, Provide:
+1. A score from 0 to 100 indicating how well the resume matches the job description.
+2. A brief explanation of the score, highlighting the strengths and weaknesses of the resume in relation to the job description.
+
+Do not include any other information or text in your response other than JSON format.
+Answer in valid JSON format with the following structure:
+{{
+  "score": 0,
+  "explanation": ""
+}}
+---
+** Resume Summary (The format here is different than the original resume) **
+Skills: {skills}
+Education: {educations}
+Achievements: {achievements}
+Experience: {experiences}
+---
+
+**Job Posting**
+Title: {job_title}    
+Required Skills: {required_skills}  
+Minimum Education: {minimum_education}   
+Description: {description}
+---
+
+Answer in JSON:
+"""
+
+APPLIER_RATE_RESUME_QUERY = """
+You are a professional resume reviewer.
+
+Based on the following resume, provide:
+1. A score from 0 to 100 evaluating the resume's overall quality and appeal to recruiters.
+2. A short paragraph explaining the strengths.
+3. Specific, actionable suggestions to improve it.
+
+Do not include any other information or text in your response other than JSON format.
+Answer in valid JSON format with the following structure:
+{{
+  "score": 0,
+  "strengths": "",
+  "suggestions": ""
+}}
+
+---
+
+** Resume Summary (The format used here is from the system, not the applier).
+Personal Information:
+{personal_information}
+
+Skills:
+{skills}
+
+Achievements:
+{achievements}
+
+Education:
+{educations}
+
+Experience:
+{experiences}
+
+---
+
+Your answer:
+"""
+
+APPLIER_ASK_JOB_QUERY = """
+You are a career advisor AI.
+
+Based on the resume below and the job posting, evaluate whether this applicant is a strong match for the job. Provide:
+1. A “Yes” or “No” suitability answer.
+2. A brief explanation highlighting the match or mismatch in skills or experience.
+3. Suggestions to improve the applicant's chances.
+---
+
+Do not include any other information or text in your response other than JSON format.
+Answer in valid JSON format with the following structure:
+{{
+  "suitability": "Yes/No",
+  "explanation": "",
+  "suggestions": ""
+}}
+
+**Resume Summary (The format here is different than the original resume) **
+Skills:
+{skills}
+
+Achievements:
+{achievements}
+
+Education:
+{educations}
+
+Work Experience:
+{experiences}
+
+---
+
+**Job Posting**
+Title: {job_title}    
+Required Skills: {required_skills}  
+Minimum Education: {minimum_education}   
+Description: {description}
+
+---
+
+Your answer:
+"""
