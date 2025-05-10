@@ -48,3 +48,17 @@ class ResumeDeleteOptions(BaseModel):
     delete_resume_url: bool = False
     delete_resume_parsed: bool = False
     updated_at: datetime = Field(default_factory=datetime.now)
+
+class RecruiterRateResume(BaseModel):
+    score: Optional[str] = None 
+    explanation: Optional[str] = None
+
+class ApplierRateResume(BaseModel):
+    score: Optional[str] = None 
+    strengths: Optional[str] = None
+    suggestions: Optional[str] = None
+
+class ApplierAskJob(BaseModel):
+    suitability: Optional[str] = None
+    explanation: Optional[str] = None
+    suggestions: Optional[str] = None
