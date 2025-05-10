@@ -6,8 +6,14 @@ from fastapi import APIRouter, Depends, File, Query, UploadFile, status
 
 from app.ai_services.ocr import OCR
 from app.ai_services.pdf_parser import *
+from app.ai_services.resume_service import ResumeService
+from app.config.db import Database
 
 router = APIRouter(prefix="/resume", tags=["Resume"])
+
+async def get_resume_controller() -> ResumeService:
+    db = Database.get_db()
+    return ResumeService(db)
 
 async def get_ocr_controller() -> OCR:
     api_key = 'helloworld'
@@ -51,3 +57,28 @@ async def parse_pdf_text(
 
     return result
 
+@router.get("/applier/rate", response_model=ApplierRateResume, status_code=status.HTTP_200_OK)
+async def get_applier_resume_score(
+    applier_id: str = Query(..., description="ID applier"),
+    controller: ResumeService = Depends(get_resume_controller)
+):
+    """API untuk mendapatkan skor resume applier"""
+    return await controller.get_resume_score(applier_id)    
+
+@router.get("/recruiter/rate", response_model=RecruiterRateResume, status_code=status.HTTP_200_OK)
+async def get_recruiter_resume_score(
+    applier_id: str = Query(..., description="ID applier"),
+    job_id: str = Query(..., description="ID job"),
+    controller: ResumeService = Depends(get_resume_controller)
+):
+    """API untuk mendapatkan skor resume applier dari sisi recruiter"""
+    return await controller.get_applier_resume_score(applier_id, job_id)
+
+@router.get("/applier/ask", response_model=ApplierAskJob, status_code=status.HTTP_200_OK)
+async def get_applier_resume_score(
+    applier_id: str = Query(..., description="ID applier"),
+    job_id: str = Query(..., description="ID job"),
+    controller: ResumeService = Depends(get_resume_controller)
+):
+    """API untuk mendapatkan skor resume applier berdasarkan job"""
+    return await controller.get_applier_ask_job(applier_id, job_id)
