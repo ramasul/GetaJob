@@ -10,7 +10,7 @@ export default function Header({ currentPage, userType }) {
       ? [
           {
             name: "Company Profile",
-            href: "/company-profile",
+            href: "/recruiter/company-profile",
             key: "company-profile",
           },
           { name: "Dashboard", href: "/recruiter/dashboard", key: "dashboard" },
