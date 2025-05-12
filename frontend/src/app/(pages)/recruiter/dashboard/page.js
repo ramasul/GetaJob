@@ -5,6 +5,116 @@ import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Link from "next/link";
 import { useAuth } from '@/app/auth/context';
+import { useRouter } from 'next/navigation';
+
+// Dropdown Menu Component
+const JobActionMenu = ({ job, onUpdateStatus }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  // Log job details for debugging
+  useEffect(() => {
+    console.log('Job Details:', {
+      job_id: job._id,
+      current_status: job.status
+    });
+  }, [job]);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const handleDetails = () => {
+    router.push(`/recruiter/dashboard/${job._id}`);
+    setIsOpen(false);
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      // Log the details before sending the request
+      console.log('Updating Job Status:', {
+        job_id: job._id,
+        current_status: job.status,
+        new_status: newStatus
+      });
+
+      const response = await fetch(`https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/${job._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          status: newStatus.toLowerCase() 
+        }),
+      });
+
+      // Log the response for debugging
+      const responseData = await response.json();
+      console.log('Update Response:', {
+        status: response.status,
+        ok: response.ok,
+        response_data: responseData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update job status');
+      }
+
+      onUpdateStatus(job._id, newStatus);
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error updating job status:', error);
+      // Optionally, add error handling (e.g., show error toast)
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={toggleMenu} 
+        className="text-gray-500 hover:text-gray-700"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+        </svg>
+      </button>
+      
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1" role="menu" aria-orientation="vertical">
+            <button 
+              onClick={handleDetails}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+              role="menuitem"
+            >
+              Details
+            </button>
+            <div className="border-t border-gray-200"></div>
+            <div className="py-1">
+              <button 
+                onClick={() => handleStatusChange('Active')}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                role="menuitem"
+              >
+                Set to Active
+              </button>
+              <button 
+                onClick={() => handleStatusChange('Inactive')}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                role="menuitem"
+              >
+                Set to Inactive
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function DashboardCompany() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -12,6 +122,7 @@ export default function DashboardCompany() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
   
   // Get user from auth context
   const { user } = useAuth();
@@ -37,9 +148,17 @@ export default function DashboardCompany() {
       }
     };
   
-
     fetchJobs();
   }, [user]);
+
+  // Update job status in local state
+  const handleUpdateStatus = (jobId, newStatus) => {
+    setJobs(prevJobs => 
+      prevJobs.map(job => 
+        job._id === jobId ? { ...job, status: newStatus.toLowerCase() } : job
+      )
+    );
+  };
 
   // Get status badge color
   const getStatusBadgeColor = (status) => {
@@ -130,7 +249,11 @@ export default function DashboardCompany() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {jobs.length > 0 ? (
                       jobs.map((job) => (
-                        <tr key={job._id} className="hover:bg-gray-50">
+                        <tr 
+                          key={job._id} 
+                          className="hover:bg-gray-50 cursor-pointer"
+                          onClick={() => router.push(`/recruiter/dashboard/${job._id}`)}
+                        >
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-gray-900">
                               {job.job_title}
@@ -155,17 +278,14 @@ export default function DashboardCompany() {
                               {Math.floor(Math.random() * 10) + 1} / {Math.floor(Math.random() * 10) + 10}
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button className="text-gray-500 hover:text-gray-700">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-5 w-5"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                              >
-                                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-                              </svg>
-                            </button>
+                          <td 
+                            className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <JobActionMenu 
+                              job={job} 
+                              onUpdateStatus={handleUpdateStatus} 
+                            />
                           </td>
                         </tr>
                       ))
