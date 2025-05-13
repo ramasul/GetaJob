@@ -37,11 +37,13 @@ async def refresh_applier_cluster_kmeans(
 @router.get("/applier/{applier_id}", response_model=List[JobResponse])
 async def get_applier_recommendations(
     applier_id: str,
+    limit: int = Query(10, ge=1, le=100),
+    weight: float = Query(0.3, ge=0.0, le=1.0),
     controller: RecommendationService = Depends(get_recommendation_service),
     job_controller: JobController = Depends(get_job_controller)
 ):
     """API untuk mendapatkan rekomendasi pekerjaan untuk applier tertentu"""
-    top_job_ids = await controller.get_recommendations_for_user(applier_id, 1, 0.3)
+    top_job_ids = await controller.get_recommendations_for_user(applier_id, limit, weight)
     jobs = []
     for job_id in top_job_ids:
         job = await job_controller.get_job(job_id)

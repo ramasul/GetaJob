@@ -199,7 +199,7 @@ class JobController:
     async def get_jobs_with_image(self, skip: int = 0, limit: int = 10) -> List[JobWithImageResponse]:
         """Mendapatkan semua job dengan gambar."""
         try:
-            cursor = self.collection.find().skip(skip).limit(limit)
+            cursor = self.collection.find().sort("updated_at", -1).skip(skip).limit(limit)
             jobs = await cursor.to_list(length=limit)
             
             for job in jobs:
@@ -248,7 +248,7 @@ class JobController:
             else:
                 search_query = {}
             
-            cursor = self.collection.find(search_query).skip(skip).limit(limit)
+            cursor = self.collection.find(search_query).sort("updated_at", -1).skip(skip).limit(limit)
         
             async for document in cursor:
                 document["_id"] = str(document["_id"])
