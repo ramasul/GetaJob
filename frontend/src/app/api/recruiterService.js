@@ -102,7 +102,7 @@ export const recruiterService = {
 
   async getAllRecruiters(page, recruiter_per_page) {
     try {
-      skip = (page - 1) * recruiter_per_page;
+      const skip = (page - 1) * recruiter_per_page;
       const response = await api.get("/recruiters/", {
         params: {
           skip: skip,
