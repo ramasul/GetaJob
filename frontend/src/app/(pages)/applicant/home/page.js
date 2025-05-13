@@ -1,67 +1,136 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
-import axios from "axios";
-import axiosInstance from "@/app/utils/api";
-
+import ProfilePicturePopup from "@/app/components/ProfilePicturePopup";
+import SkeletonGrid from "@/app/components/JobListSkeleton";
+import NoJobsFound from "@/app/components/NoJobsFound";
+import ProtectedRoute from "@/app/components/ProtectedRoute";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { applierService } from "@/app/api/applierService";
+import { jobService } from "@/app/api/jobService";
+import { useAuth } from "@auth/context";
 
 export default function JobSearch() {
-
   const [jobs, setJobs] = useState([]);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const job_per_page = 5;
 
-  // Sample job data
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    (query) => {
+      const timeoutId = setTimeout(() => {
+        router.push(`/applicant/home?query=${query}&page=1`);
+      }, 200);
+      return () => clearTimeout(timeoutId);
+    },
+    [router]
+  );
+
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    debouncedSearch(query);
+  };
+
   useEffect(() => {
-    const fetchJobs = async () => {
+    const checkProfileAndFetchJobs = async () => {
       try {
-        const response = await axiosInstance.get("/jobs");
+        setIsLoading(true);
+        // Check if user has profile picture
+        if (user && user.user_type === "applier") {
+          const applierData = await applierService.getApplierByID(user.id);
+          if (!applierData.profile_picture_url) {
+            setShowProfilePopup(true);
+          }
+        }
 
-        // Transform the response to match your desired structure
-        const transformedJobs = response.data.map((job, i) => ({
+        // Get query params
+        const query = searchParams.get("query") || "";
+        const page = parseInt(searchParams.get("page")) || 1;
+
+        setSearchQuery(query);
+        setCurrentPage(page);
+
+        // Fetch jobs
+        const response = await jobService.searchJobsWithImage(
+          query,
+          page,
+          job_per_page
+        );
+        const countResponse = await jobService.countJobs(query);
+        const transformedJobs = response.map((job) => ({
           id: job._id,
           title: job.job_title,
           company: job.company_name,
           location: job.location,
           salary: job.salary_range,
           description: job.description,
+          profile_picture_url: job.profile_picture_url,
         }));
-
         setJobs(transformedJobs);
+        setTotalPages(Math.ceil(countResponse / job_per_page));
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        console.error("Error:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchJobs();
-  }, []);
-  
-  return (
-    <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300">
-      <Header currentPage="browse-companies" userType="applicant" />
-      {/* Hero Section */}
-      <div className="px-[2vw] py-[1.2vw]">
-        <div className="w-[80vw] mx-auto flex flex-row items-center ">
-          <div className="items-center justify-center">
-            <h1 className="text-[4vw]/[4.3vw] font-bold text-blue-600 mb-[1vw]">
-              Find a job that suits
-              <br />
-              your interest & skills.
-            </h1>
-            <p className="text-[1.5vw]/[1.7vw] text-blue-800 opacity-80 mb-[2vw] w-[40vw]">
-              Aliquam vitae turpis in diam conguis finibus id at risus. Nullam
-              in scelerisque leo, eget sollicitudin velit vestibulum.
-            </p>
+    checkProfileAndFetchJobs();
+  }, [user, searchParams]);
 
-            {/* Search Form */}
-            <div className="flex flex-row  items-center bg-white h-[4.5vw] rounded-[0.7vw] ">
-              <div className="relative flex h-[3vw] border border-gray-300 rounded-md mx-[0.5vw]">
-                <div className=" flex items-center pointer-events-none w-[0vw]">
+  const handlePageChange = (page) => {
+    router.push(`/applicant/home?query=${searchQuery}&page=${page}`);
+  };
+
+  const handleClosePopup = () => {
+    setShowProfilePopup(false);
+  };
+
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen w-full bg-gradient-to-tr from-cyan-400 to-cyan-200">
+        <Header currentPage="browse-companies" userType="applicant" />
+
+        {/* Profile Picture Popup */}
+        {showProfilePopup && <ProfilePicturePopup onClose={handleClosePopup} />}
+
+        {/* Logo Section */}
+        <div className="px-4 md:px-8 py-6 md:py-12">
+          <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
+            <div className="w-full md:w-1/2">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-700 mb-4">
+                Find a job that suits
+                <br />
+                your interest & skills.
+              </h1>
+              <p className="text-base md:text-lg text-cyan-800 opacity-80 mb-6 max-w-xl">
+                Discover opportunities that match your expertise and career
+                goals. Start your journey to success today.
+              </p>
+
+              {/* Search Form */}
+              <div className="w-full bg-white/90 backdrop-blur-md rounded-xl shadow-lg p-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                    placeholder="Search jobs by title, keyword..."
+                    className="w-full px-4 py-3 text-gray-700 bg-white border border-cyan-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent transition-all duration-200"
+                  />
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-blue-500 absolute right-[1vw]"
+                    className="h-5 w-5 text-cyan-500 absolute right-4 top-1/2 transform -translate-y-1/2"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -74,135 +143,140 @@ export default function JobSearch() {
                     />
                   </svg>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Job title, Keyword..."
-                  className="px-[1vw] text-[1.2vw] rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black w-[30vw]"
+              </div>
+            </div>
+
+            <div className="w-full md:w-1/2 flex justify-center">
+              <div className="relative w-64 h-64 hidden md:block md:w-80 md:h-80">
+                <Image
+                  src="/image/3DHero.png"
+                  alt="Job Search"
+                  fill
+                  className="object-contain"
+                  priority
                 />
               </div>
-
-              {/* Location Search bar */}
-              {/* <div className="relative flex h-[3vw] border border-gray-300 rounded-md mx-[0.5vw]">
-                <div className="mx-[1vw]  flex items-center pointer-events-none">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-blue-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Your Location"
-                  className="w-[10vw] px-[1vw]  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-                />
-              </div> */}
-
-              <button className="bg-blue-600 hover:bg-blue-700 text-white text-[1.1vw] py-[0.6vw] px-[1.2vw] rounded-md transition-colors duration-200 mx-[0.5vw] w-[8vw]">
-                Find Job
-              </button>
             </div>
           </div>
+        </div>
 
-          <div className="mx-auto flex justify-center">
-          <div className="relative">
-                    <Image
-                      src="/image/3DHero.png"
-                      alt="Job Search"
-                      width={250}
-                      height={250}
-                      className="relative z-10 w-[20vw]"
-                      priority
-                    />
+        {/* Job Listings */}
+        <div className="px-4 md:px-8 py-8">
+          <div className="w-full max-w-7xl mx-auto">
+            {isLoading ? (
+              <SkeletonGrid count={job_per_page} />
+            ) : jobs.length === 0 ? (
+              <NoJobsFound />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {jobs.map((job) => (
+                    <div
+                      key={job.id}
+                      onClick={() =>
+                        router.push(`/applicant/details/${job.id}`)
+                      }
+                      className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-6 hover:shadow-xl transition-all duration-200 cursor-pointer"
+                    >
+                      <div className="flex items-start mb-4">
+                        <div className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center mr-3 bg-cyan-100">
+                          {job.profile_picture_url ? (
+                            <img
+                              src={job.profile_picture_url}
+                              alt="Company Logo"
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-cyan-600 font-bold text-lg">
+                              {job.company.charAt(0)}
+                            </span>
+                          )}
+                        </div>
+
+                        <div>
+                          <h3 className="font-bold text-cyan-800">
+                            {job.title}
+                          </h3>
+                          <p className="text-cyan-600 text-sm">{job.company}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 mb-3">
+                        <div className="flex items-center text-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-cyan-500 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          <span className="text-cyan-700">{job.location}</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4 text-cyan-500 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <span className="text-cyan-700">{job.salary}</span>
+                        </div>
+                      </div>
+
+                      <p className="text-sm text-cyan-700 line-clamp-3">
+                        {job.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages >= 1 && (
+                  <div className="flex justify-center mt-8 gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          disabled={page === currentPage}
+                          className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                            currentPage === page
+                              ? "bg-cyan-600 text-white"
+                              : "bg-white/90 text-cyan-700 hover:bg-cyan-100"
+                          } disabled:cursor-not-allowed cursor-pointer`}
+                        >
+                          {page}
+                        </button>
+                      )
+                    )}
                   </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
-      {/* Job Listings */}
-      <div className="px-6 py-8">
-        <div className="w-full max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {jobs.map((job) => (
-              <div
-                key={job.id}
-                onClick={() => router.push(`/applicant/details/${job.id}`)}
-                className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-4 hover:shadow-xl transition-shadow duration-200"
-              >
-                <div className="flex items-start mb-4">
-                  <div className="w-12 h-12 rounded-full bg-cyan-400 flex-shrink-0 flex items-center justify-center mr-3">
-                    <span className="text-white font-bold">C</span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-800">{job.title}</h3>
-                    <p className="text-gray-700 text-sm">{job.company}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2 mb-3">
-                  <div className="flex items-center text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-gray-600 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    <span className="text-gray-700">{job.location}</span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 text-gray-600 mr-1"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-gray-700">{job.salary}</span>
-                  </div>
-                </div>
-
-                <p className="text-sm text-gray-700 line-clamp-3">
-                  {job.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 }
