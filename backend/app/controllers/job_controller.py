@@ -299,3 +299,35 @@ class JobController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to count search results"
             )
+        
+    async def get_job_with_image(
+        self, 
+        job_id: str
+    ) -> JobWithImageResponse:
+        """Mendapatkan job berdasarkan job_id dengan gambar."""
+        try:
+            job_id = ObjectId(job_id)
+        except:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Invalid job_id format"
+            )
+
+        job = await self.collection.find_one({"_id": job_id})
+        if not job:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Job not found"
+            )
+
+        job["_id"] = str(job["_id"])
+        recruiter_id = job["recruiter_id"]
+        job["recruiter_id"] = str(job["recruiter_id"])
+        
+        recruiter = await self.db.recruiters.find_one({"_id": recruiter_id})
+        if recruiter and "profile_picture_url" in recruiter:
+            job["profile_picture_url"] = recruiter["profile_picture_url"]
+        else:
+            job["profile_picture_url"] = None
+
+        return JobWithImageResponse(**job)

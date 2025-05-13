@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from app.config.db import Database
 from app.ai_services.recommendation_service import RecommendationService
 from app.controllers.job_controller import JobController
-from app.models.job_model import JobResponse
+from app.models.job_model import JobResponse, JobWithImageResponse
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
@@ -34,7 +34,7 @@ async def refresh_applier_cluster_kmeans(
     """API untuk merefresh cluster applier"""
     return await controller.cluster_users_KMeans(n_clusters)
 
-@router.get("/applier/{applier_id}", response_model=List[JobResponse])
+@router.get("/applier/{applier_id}", response_model=List[JobWithImageResponse])
 async def get_applier_recommendations(
     applier_id: str,
     limit: int = Query(10, ge=1, le=100),
@@ -46,7 +46,7 @@ async def get_applier_recommendations(
     top_job_ids = await controller.get_recommendations_for_user(applier_id, limit, weight)
     jobs = []
     for job_id in top_job_ids:
-        job = await job_controller.get_job(job_id)
+        job = await job_controller.get_job_with_image(job_id)
         if job:
             jobs.append(job)
     return jobs
