@@ -34,7 +34,7 @@ export default function JobSearch() {
     (query) => {
       const timeoutId = setTimeout(() => {
         router.push(`/applicant/home?query=${query}&page=1`);
-      }, 200);
+      }, 1000);
       return () => clearTimeout(timeoutId);
     },
     [router]
