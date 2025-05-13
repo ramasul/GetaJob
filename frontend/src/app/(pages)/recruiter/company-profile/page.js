@@ -1,4 +1,6 @@
-// pages/company-profile.js
+"use client";
+
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -6,56 +8,57 @@ import {
   ArrowLeft, Mail, Phone, Instagram, Twitter, Globe, MapPin
 } from 'lucide-react';
 import Header from '@/app/components/Header';
+import { useAuth } from '@/app/auth/context';
 
-// Static company data object (will be replaced with API fetch later)
-const company = {
-  "username": "dzakiwismadi",
-  "company_name": "ArachnoVa",
-  "company_type": "Technology",
-  "company_description": "Menargetkan pembuatan berbagai jenis website seperti Landing Page, Profiling, dan Custom termasuk website administrasi dan dashboard, dengan tujuan meningkatkan esensi kesan profesional bagi setiap klien.",
-  "email": "dzakiwismadi@example.com",
-  "phone": "081809252706",
-  "address": {
-    "street": "Kaliurang",
-    "city": "Sleman",
-    "state": "Yogyakarta",
-    "country": "Indonesia",
-    "postal_code": "55569"
-  },
-  "website_url": "https://www.arachnova.id/",
-  "created_at": "2025-05-04T14:21:28.464000",
-  "updated_at": "2025-05-04T14:21:28.464000",
-  "_id": "68177844a72a751680a7ea95"
+// Helper to format dates
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
 };
 
 export default function CompanyProfile() {
-  // Format the full address
+  const { user } = useAuth();
+  const [company, setCompany] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetch(`https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/recruiters/${user.id}`)
+        .then(res => res.json())
+        .then(data => {
+          setCompany(data);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error("Failed to fetch company data:", err);
+          setLoading(false);
+        });
+    }
+  }, [user]);
+
+  if (loading || !company) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading company profile...</p>
+      </div>
+    );
+  }
+
   const fullAddress = [
-    company.address.street,
-    company.address.city,
-    company.address.state,
-    company.address.country,
-    company.address.postal_code
+    company.address?.street,
+    company.address?.city,
+    company.address?.state,
+    company.address?.country,
+    company.address?.postal_code
   ].filter(Boolean).join(", ");
 
-  // Format dates
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cyan-300 to-cyan-100 py-8 px-4">
-      <Head>
-        <title>Company Profile | Recruitment Dashboard</title>
-        <meta name="description" content="Company profile details" />
-      </Head>
-
-      <Header currentPage="profile" userType="recruiter" />
+    <div className="min-h-screen bg-gradient-to-b from-cyan-300 to-cyan-100">
+      <Header currentPage="company-profile" userType="recruiter" />
 
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6">
@@ -74,7 +77,6 @@ export default function CompanyProfile() {
               <div className="flex flex-col items-center mb-4">
                 <div className="relative w-24 h-24 mb-3">
                   <div className="w-full h-full bg-gray-200 rounded-full flex items-center justify-center">
-                    {/* Company initial as placeholder */}
                     <span className="text-3xl font-bold text-gray-500">
                       {company.company_name.charAt(0)}
                     </span>
@@ -130,11 +132,11 @@ export default function CompanyProfile() {
               <div className="bg-white p-6 rounded-xl border">
                 <h3 className="font-medium text-gray-800 mb-4">Address Details</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Field label="Street" value={company.address.street} />
-                  <Field label="City" value={company.address.city} />
-                  <Field label="State/Province" value={company.address.state} />
-                  <Field label="Country" value={company.address.country} />
-                  <Field label="Postal Code" value={company.address.postal_code} />
+                  <Field label="Street" value={company.address?.street} />
+                  <Field label="City" value={company.address?.city} />
+                  <Field label="State/Province" value={company.address?.state} />
+                  <Field label="Country" value={company.address?.country} />
+                  <Field label="Postal Code" value={company.address?.postal_code} />
                 </div>
               </div>
             </div>
@@ -145,7 +147,7 @@ export default function CompanyProfile() {
   );
 }
 
-// Reusable Components
+// Reusable components
 function Field({ label, value }) {
   return (
     <div>

@@ -81,7 +81,7 @@ export default function Register() {
                       }`}
                     >
                       <Image
-                        src="/image/3DHero.png?height=100&width=100"
+                        src="/image/person_searching_job.png"
                         alt="Applier"
                         fill
                         className="object-contain"
@@ -109,7 +109,7 @@ export default function Register() {
                       }`}
                     >
                       <Image
-                        src="/image/3DHero.png?height=100&width=100"
+                        src="/image/company_building.png"
                         alt="Recruiter"
                         fill
                         className="object-contain"

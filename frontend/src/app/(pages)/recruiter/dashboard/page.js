@@ -1,97 +1,173 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Link from "next/link";
+import { useAuth } from '@/app/auth/context';
+import { useRouter } from 'next/navigation';
+
+// Dropdown Menu Component
+const JobActionMenu = ({ job, onUpdateStatus }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
+
+  // Log job details for debugging
+  useEffect(() => {
+    console.log('Job Details:', {
+      job_id: job._id,
+      current_status: job.status
+    });
+  }, [job]);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const handleDetails = () => {
+    router.push(`/recruiter/dashboard/${job._id}`);
+    setIsOpen(false);
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      // Log the details before sending the request
+      console.log('Updating Job Status:', {
+        job_id: job._id,
+        current_status: job.status,
+        new_status: newStatus
+      });
+
+      const response = await fetch(`https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/${job._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          status: newStatus.toLowerCase() 
+        }),
+      });
+
+      // Log the response for debugging
+      const responseData = await response.json();
+      console.log('Update Response:', {
+        status: response.status,
+        ok: response.ok,
+        response_data: responseData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update job status');
+      }
+
+      onUpdateStatus(job._id, newStatus);
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error updating job status:', error);
+      // Optionally, add error handling (e.g., show error toast)
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button 
+        onClick={toggleMenu} 
+        className="text-gray-500 hover:text-gray-700"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+        </svg>
+      </button>
+      
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1" role="menu" aria-orientation="vertical">
+            <button 
+              onClick={handleDetails}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+              role="menuitem"
+            >
+              Details
+            </button>
+            <div className="border-t border-gray-200"></div>
+            <div className="py-1">
+              <button 
+                onClick={() => handleStatusChange('Active')}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                role="menuitem"
+              >
+                Set to Active
+              </button>
+              <button 
+                onClick={() => handleStatusChange('Inactive')}
+                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                role="menuitem"
+              >
+                Set to Inactive
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function DashboardCompany() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
+  
+  // Get user from auth context
+  const { user } = useAuth();
 
-  // Sample job data
-  const jobs = [
-    {
-      id: 1,
-      role: "Social Media Assistant",
-      status: "Live",
-      datePosted: "20 May 2020",
-      dueDate: "24 May 2020",
-      jobType: "Fulltime",
-      applicants: 19,
-      needs: "4 / 11",
-    },
-    {
-      id: 2,
-      role: "Senior Designer",
-      status: "Live",
-      datePosted: "16 May 2020",
-      dueDate: "24 May 2020",
-      jobType: "Fulltime",
-      applicants: 1234,
-      needs: "0 / 20",
-    },
-    {
-      id: 3,
-      role: "Visual Designer",
-      status: "Live",
-      datePosted: "15 May 2020",
-      dueDate: "24 May 2020",
-      jobType: "Freelance",
-      applicants: 2435,
-      needs: "1 / 5",
-    },
-    {
-      id: 4,
-      role: "Data Sience",
-      status: "Closed",
-      datePosted: "13 May 2020",
-      dueDate: "24 May 2020",
-      jobType: "Freelance",
-      applicants: 6234,
-      needs: "10 / 10",
-    },
-    {
-      id: 5,
-      role: "Kotlin Developer",
-      status: "Closed",
-      datePosted: "12 May 2020",
-      dueDate: "24 May 2020",
-      jobType: "Fulltime",
-      applicants: 12,
-      needs: "20 / 20",
-    },
-    {
-      id: 6,
-      role: "React Developer",
-      status: "Closed",
-      datePosted: "11 May 2020",
-      dueDate: "24 May 2020",
-      jobType: "Fulltime",
-      applicants: 14,
-      needs: "10 / 10",
-    },
-  ];
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        if (!user || !user.id) return;
+        
+        const response = await fetch(`https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/recruiter/${user.id}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch jobs');
+        }
+        
+        const data = await response.json();
+        setJobs(data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+  
+    fetchJobs();
+  }, [user]);
+
+  // Update job status in local state
+  const handleUpdateStatus = (jobId, newStatus) => {
+    setJobs(prevJobs => 
+      prevJobs.map(job => 
+        job._id === jobId ? { ...job, status: newStatus.toLowerCase() } : job
+      )
+    );
+  };
 
   // Get status badge color
   const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case "Live":
+    switch (status?.toLowerCase()) {
+      case "active":
         return "bg-cyan-50 text-cyan-500 border border-cyan-200";
-      case "Closed":
+      case "inactive":
+      case "closed":
         return "bg-red-50 text-red-500 border border-red-200";
-      default:
-        return "bg-gray-50 text-gray-500 border border-gray-200";
-    }
-  };
-
-  // Get job type badge color
-  const getJobTypeBadgeColor = (jobType) => {
-    switch (jobType) {
-      case "Fulltime":
-        return "bg-indigo-50 text-indigo-500 border border-indigo-200";
-      case "Freelance":
-        return "bg-amber-50 text-amber-500 border border-amber-200";
       default:
         return "bg-gray-50 text-gray-500 border border-gray-200";
     }
@@ -99,11 +175,11 @@ export default function DashboardCompany() {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300">
-      {/* Use your existing Header component */}
+      {/* Header component */}
       <Header currentPage="dashboard" userType="recruiter" />
 
       {/* Job List Container */}
-      <div className="w-[90vw]  mx-auto px-4 py-4">
+      <div className="w-[90vw] mx-auto px-4 py-4">
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {/* Job List Header */}
           <div className="p-6 flex justify-between items-center">
@@ -127,195 +203,190 @@ export default function DashboardCompany() {
             </button>
           </div>
 
-          {/* Job List Table */}
-          <div className="overflow-x-auto scale-[0.98]">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Roles
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Status
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Date Posted
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Due Date
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Job Type
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Applicants
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Needs
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {job.role}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${getStatusBadgeColor(job.status)}`}
+          {loading ? (
+            <div className="p-6 text-center">Loading job data...</div>
+          ) : error ? (
+            <div className="p-6 text-center text-red-500">Error loading jobs: {error}</div>
+          ) : (
+            <>
+              {/* Job List Table */}
+              <div className="overflow-x-auto scale-[0.98]">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        {job.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {job.datePosted}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{job.dueDate}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${getJobTypeBadgeColor(job.jobType)}`}
+                        Job Title
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        {job.jobType}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {job.applicants}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{job.needs}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button className="text-gray-500 hover:text-gray-700">
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Applicants
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Needs
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {jobs.length > 0 ? (
+                      jobs.map((job) => (
+                        <tr 
+                          key={job._id} 
+                          className="hover:bg-gray-50 cursor-pointer"
+                          onClick={() => router.push(`/recruiter/dashboard/${job._id}`)}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              {job.job_title}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-3 py-1 inline-flex text-xs leading-5 font-medium rounded-full ${getStatusBadgeColor(job.status)}`}
+                            >
+                              {job.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">
+                              {/* Static for now */}
+                              {Math.floor(Math.random() * 100) + 1}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">
+                              {/* Static for now */}
+                              {Math.floor(Math.random() * 10) + 1} / {Math.floor(Math.random() * 10) + 10}
+                            </div>
+                          </td>
+                          <td 
+                            className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <JobActionMenu 
+                              job={job} 
+                              onUpdateStatus={handleUpdateStatus} 
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
+                          No jobs found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination */}
+              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div className="flex items-center">
+                  <span className="text-sm text-gray-700 mr-2">View</span>
+                  <div className="relative">
+                    <select
+                      className="appearance-none h-8 rounded border-gray-300 py-0 pl-3 pr-8 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      value={itemsPerPage}
+                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={30}>30</option>
+                      <option value={40}>40</option>
+                      <option value={50}>50</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-gray-500">
+                      <svg
+                        className="h-4 w-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                  <span className="text-sm text-gray-700 ml-2">
+                    Items per page
+                  </span>
+                </div>
+
+                {jobs.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex">
+                      <button 
+                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <span className="sr-only">Previous</span>
                         <svg
-                          xmlns="http://www.w3.org/2000/svg"
                           className="h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 20 20"
                           fill="currentColor"
+                          aria-hidden="true"
                         >
-                          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path
+                            fillRule="evenodd"
+                            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div className="flex items-center">
-              <span className="text-sm text-gray-700 mr-2">View</span>
-              <div className="relative">
-                <select
-                  className="appearance-none h-8 rounded border-gray-300 py-0 pl-3 pr-8 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={itemsPerPage}
-                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={30}>30</option>
-                  <option value={40}>40</option>
-                  <option value={50}>50</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-gray-500">
-                  <svg
-                    className="h-4 w-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
+                      <button className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-none text-white bg-indigo-600 hover:bg-indigo-700">
+                        {currentPage}
+                      </button>
+                      <button 
+                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                        disabled={jobs.length < itemsPerPage}
+                      >
+                        <span className="sr-only">Next</span>
+                        <svg
+                          className="h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <span className="text-sm text-gray-700 ml-2">
-                Applicants per page
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex">
-                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <span className="sr-only">Previous</span>
-                  <svg
-                    className="h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-none text-white bg-indigo-600 hover:bg-indigo-700">
-                  1
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  2
-                </button>
-                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <span className="sr-only">Next</span>
-                  <svg
-                    className="h-5 w-5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
 
