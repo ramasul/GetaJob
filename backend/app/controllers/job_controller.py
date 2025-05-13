@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import List, Optional
 
-from app.models.job_model import JobCreate, JobUpdate, JobInDB, JobResponse
+from app.models.job_model import JobCreate, JobUpdate, JobInDB, JobResponse, JobWithImageResponse
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +186,82 @@ class JobController:
                 document["_id"] = str(document["_id"])
                 document["recruiter_id"] = str(document["recruiter_id"])
                 jobs.append(JobResponse(**document))
+        
+            return jobs
+        
+        except Exception as e:
+            logger.error(f"Error searching jobs: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to search jobs"
+            )
+        
+    async def get_jobs_with_image(self, skip: int = 0, limit: int = 10) -> List[JobWithImageResponse]:
+        """Mendapatkan semua job dengan gambar."""
+        try:
+            cursor = self.collection.find().skip(skip).limit(limit)
+            jobs = await cursor.to_list(length=limit)
+            
+            for job in jobs:
+                job["_id"] = str(job["_id"])
+                recruiter_id = job["recruiter_id"]
+                job["recruiter_id"] = str(job["recruiter_id"])
+                recruiter = await self.db.recruiters.find_one({"_id": recruiter_id})
+                if recruiter and "profile_picture_url" in recruiter:
+                    job["profile_picture_url"] = recruiter["profile_picture_url"]
+                else:
+                    job["profile_picture_url"] = None
+
+            return [JobResponse(**job) for job in jobs]
+        except Exception as e:
+            logger.error(f"Error fetching jobs: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to fetch jobs"
+            )
+
+    async def search_jobs_with_image(
+        self, 
+        query: str = "", 
+        skip: int = 0, 
+        limit: int = 100
+    ) -> List[JobWithImageResponse]:
+        """Cari job dengan gambar berdasarkan query dengan substring matching."""
+        try:
+            jobs = []
+            
+            if query:
+                # Case-insensitive regex search across multiple fields
+                search_query = {
+                    "$or": [
+                        {"job_title": {"$regex": query, "$options": "i"}},
+                        {"company_name": {"$regex": query, "$options": "i"}},
+                        {"location": {"$regex": query, "$options": "i"}},
+                        {"employment_type": {"$regex": query, "$options": "i"}},
+                        {"description": {"$regex": query, "$options": "i"}}
+                    ]
+                }
+                
+                # This adds documents where any array element contains the query string
+                skill_query = {"required_skills": {"$elemMatch": {"$regex": query, "$options": "i"}}}
+                search_query["$or"].append(skill_query)
+            else:
+                search_query = {}
+            
+            cursor = self.collection.find(search_query).skip(skip).limit(limit)
+        
+            async for document in cursor:
+                document["_id"] = str(document["_id"])
+                recruiter_id = document["recruiter_id"]
+                document["recruiter_id"] = str(document["recruiter_id"])
+                
+                recruiter = await self.db.recruiters.find_one({"_id": recruiter_id})
+                if recruiter and "profile_picture_url" in recruiter:
+                    document["profile_picture_url"] = recruiter["profile_picture_url"]
+                else:
+                    document["profile_picture_url"] = None
+                
+                jobs.append(JobWithImageResponse(**document))
         
             return jobs
         

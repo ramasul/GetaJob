@@ -48,3 +48,10 @@ class JobResponse(JobBase):
     recruiter_id: PyObjectId
 
     model_config = {"populate_by_name": True, "arbitrary_types_allowed": True}
+
+class JobWithImageResponse(JobBase):
+    id: PyObjectId = Field(alias="_id")
+    recruiter_id: PyObjectId
+    profile_picture_url: Optional[str] = None
+
+    model_config = {"populate_by_name": True, "arbitrary_types_allowed": True}
