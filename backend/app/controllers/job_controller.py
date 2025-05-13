@@ -157,19 +157,38 @@ class JobController:
                 detail="Job not found"
             )
 
-    async def search_jobs(self, query: dict, skip: int = 0, limit: int = 100) -> List[JobResponse]:
-        """Cari job berdasarkan query."""
+    async def search_jobs(self, query: str, skip: int = 0, limit: int = 100) -> List[JobResponse]:
+        """Cari job berdasarkan query dengan substring matching."""
         try:
             jobs = []
-            cursor = self.collection.find(query).skip(skip).limit(limit)
             
+            if query:
+                # Case-insensitive regex search across multiple fields
+                search_query = {
+                    "$or": [
+                        {"job_title": {"$regex": query, "$options": "i"}},
+                        {"company_name": {"$regex": query, "$options": "i"}},
+                        {"location": {"$regex": query, "$options": "i"}},
+                        {"employment_type": {"$regex": query, "$options": "i"}},
+                        {"description": {"$regex": query, "$options": "i"}}
+                    ]
+                }
+                
+                # This adds documents where any array element contains the query string
+                skill_query = {"required_skills": {"$elemMatch": {"$regex": query, "$options": "i"}}}
+                search_query["$or"].append(skill_query)
+            else:
+                search_query = {}
+            
+            cursor = self.collection.find(search_query).skip(skip).limit(limit)
+        
             async for document in cursor:
                 document["_id"] = str(document["_id"])
                 document["recruiter_id"] = str(document["recruiter_id"])
                 jobs.append(JobResponse(**document))
-            
+        
             return jobs
-            
+        
         except Exception as e:
             logger.error(f"Error searching jobs: {str(e)}")
             raise HTTPException(
