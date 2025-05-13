@@ -31,16 +31,11 @@ async def create_log_view_indexes(database: AsyncIOMotorDatabase):
         # Index untuk created_at (untuk query berdasarkan waktu pembuatan)
         await database.jobs.create_index([("created_at", -1)])
 
-        # Index untuk job_title, company_name, location, employment_type, required_skills, description
-        await database.jobs.create_index([
-            ("job_title", "text"),
-            ("company_name", "text"),
-            ("location", "text"),
-            ("employment_type", "text"),
-            ("required_skills", "text"),
-            ("description", "text")
-        ])
-
+        await database.jobs.create_index("job_title")
+        await database.jobs.create_index("company_name")
+        await database.jobs.create_index("location")
+        await database.jobs.create_index("employment_type")
+        await database.jobs.create_index("required_skills")
         logger.info("All indexes created successfully for log_views collection")
     except Exception as e:
         logger.error(f"Error creating indexes for log_views collection: {str(e)}")

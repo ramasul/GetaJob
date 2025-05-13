@@ -75,6 +75,5 @@ async def search_jobs(
     limit: int = 100,
     controller: JobController = Depends(get_job_controller)
 ):
-    """Mencari job berdasarkan query"""
-    search_query = {"$text": {"$search": query}} if query else {}
-    return await controller.search_jobs(search_query, skip, limit)
+    """Mencari job berdasarkan query dengan substring matching"""
+    return await controller.search_jobs(query, skip, limit)
