@@ -7,7 +7,8 @@ from app.controllers.job_controller import JobController
 from app.models.job_model import (
     JobCreate,
     JobUpdate,
-    JobResponse
+    JobResponse,
+    JobWithImageResponse
 )
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
@@ -77,3 +78,22 @@ async def search_jobs(
 ):
     """Mencari job berdasarkan query dengan substring matching"""
     return await controller.search_jobs(query, skip, limit)
+
+@router.get("/search/image/", response_model=List[JobWithImageResponse])
+async def search_jobs(
+    query: str = "",
+    skip: int = 0,
+    limit: int = 100,
+    controller: JobController = Depends(get_job_controller)
+):
+    """Mencari job berdasarkan query dengan substring matching"""
+    return await controller.search_jobs_with_image(query, skip, limit)
+
+@router.get("/image/", response_model=List[JobWithImageResponse])
+async def get_jobs_with_image(
+    skip: int = 0,
+    limit: int = 100,
+    controller: JobController = Depends(get_job_controller)
+):
+    """Mendapatkan semua data job dengan gambar profil recruiter"""
+    return await controller.get_jobs_with_image(skip, limit)
