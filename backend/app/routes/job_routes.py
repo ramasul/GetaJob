@@ -97,3 +97,11 @@ async def get_jobs_with_image(
 ):
     """Mendapatkan semua data job dengan gambar profil recruiter"""
     return await controller.get_jobs_with_image(skip, limit)
+
+@router.get("/image/count", response_model=int)
+async def get_jobs_with_image_count(
+    query: str = "",
+    controller: JobController = Depends(get_job_controller)
+):
+    """Mendapatkan jumlah semua data job dengan gambar profil recruiter"""
+    return await controller.count_search_jobs(query)

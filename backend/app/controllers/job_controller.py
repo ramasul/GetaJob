@@ -271,3 +271,31 @@ class JobController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to search jobs"
             )
+        
+    async def count_search_jobs(self, query: str = "") -> int:
+        """Count total number of jobs matching the search query without retrieving documents."""
+        try:
+            if query:
+                search_query = {
+                    "$or": [
+                        {"job_title": {"$regex": query, "$options": "i"}},
+                        {"company_name": {"$regex": query, "$options": "i"}},
+                        {"location": {"$regex": query, "$options": "i"}},
+                        {"employment_type": {"$regex": query, "$options": "i"}},
+                        {"description": {"$regex": query, "$options": "i"}}
+                    ]
+                }
+                
+                skill_query = {"required_skills": {"$elemMatch": {"$regex": query, "$options": "i"}}}
+                search_query["$or"].append(skill_query)
+            else:
+                search_query = {}
+            
+            total = await self.collection.count_documents(search_query)
+            return total
+        except Exception as e:
+            logger.error(f"Error counting search results: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to count search results"
+            )
