@@ -5,7 +5,7 @@ import React from "react";
 const Loading = ({ fullScreen = true }) => {
   return (
     <div
-      className={`${fullScreen ? "min-h-screen" : "min-h-[200px]"} w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300 flex flex-col items-center justify-center`}
+      className={`${fullScreen ? "min-h-screen" : "min-h-[200px]"} w-full bg-gradient-to-tr from-cyan-400 to-cyan-200 flex flex-col items-center justify-center`}
     >
       <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-8 flex flex-col items-center">
         <div className="relative w-16 h-16">
