@@ -99,7 +99,7 @@ export const applierService = {
 
   async getAllAppliers(page, applier_per_page) {
     try {
-      skip = (page - 1) * applier_per_page;
+      const skip = (page - 1) * applier_per_page;
       const response = await api.get("/appliers/", {
         params: {
           skip: skip,
@@ -184,6 +184,18 @@ export const applierService = {
       );
     } catch (error) {
       console.error("Error changing password:", error);
+      throw error;
+    }
+  },
+
+  async deleteProfilePicture(applier_id) {
+    try {
+      const response = await api.put(
+        `/appliers/${applier_id}/clear-profile-picture`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting profile picture:", error);
       throw error;
     }
   },
