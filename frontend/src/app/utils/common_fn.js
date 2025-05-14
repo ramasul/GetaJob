@@ -30,4 +30,4 @@ export function cleanEmptyValues(obj) {
   return cleaned;
 }
 
-export default { cleanEmptyValues };
+export default cleanEmptyValues;
