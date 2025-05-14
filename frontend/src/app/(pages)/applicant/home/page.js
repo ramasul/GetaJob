@@ -236,9 +236,11 @@ export default function JobSearch() {
                       <div className="flex items-start mb-4">
                         <div className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center mr-3 bg-cyan-100">
                           {job.profile_picture_url ? (
-                            <img
+                            <Image
                               src={job.profile_picture_url}
                               alt="Company Logo"
+                              width={100}
+                              height={100}
                               className="w-full h-full rounded-full object-cover"
                             />
                           ) : (
