@@ -15,8 +15,9 @@ import { useAuth } from "@auth/context";
 import JobCarousel from "@/app/components/JobCarousel";
 import { set } from "zod";
 import Loading from "@/app/components/Loading";
+import { Suspense } from "react";
 
-export default function JobSearch() {
+function JobSearchContent() {
   const [jobs, setJobs] = useState([]);
   const [jobRecommendations, setJobRecommendations] = useState([]);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
@@ -335,5 +336,13 @@ export default function JobSearch() {
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function JobSearch() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JobSearchContent />
+    </Suspense>
   );
 }

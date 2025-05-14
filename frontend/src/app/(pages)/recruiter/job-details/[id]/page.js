@@ -23,7 +23,7 @@ export default function JobDetailRecruiter() {
         const jobResponse = await axios.get(
           `https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/${jobId}`
         );
-        
+
         const jobData = jobResponse.data;
         setJob({
           title: jobData.job_title,
@@ -39,19 +39,19 @@ export default function JobDetailRecruiter() {
         const companyResponse = await axios.get(
           `https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/recruiters/${recruiterId}`
         );
-        
+
         const companyData = companyResponse.data;
         setCompany({
           title: companyData.company_name,
           image: "/image/map.png", // Default image - you might want to add this field to your API
-          location: `${companyData.address?.street || ''}, ${companyData.address?.city || ''}, ${companyData.address?.state || ''}, ${companyData.address?.country || ''}`,
+          location: `${companyData.address?.street || ""}, ${companyData.address?.city || ""}, ${companyData.address?.state || ""}, ${companyData.address?.country || ""}`,
           employeeQuantity: "N/A", // Not in API data, could be added later
           industry: companyData.company_type,
           email: companyData.email,
           phone: companyData.phone,
           companyDescription: companyData.company_description,
         });
-        
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -84,7 +84,7 @@ export default function JobDetailRecruiter() {
         <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-700">{error}</p>
-          <button 
+          <button
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
             onClick={() => window.history.back()}
           >
@@ -100,8 +100,10 @@ export default function JobDetailRecruiter() {
       <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300 flex items-center justify-center">
         <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-xl font-bold text-red-600 mb-4">Not Found</h2>
-          <p className="text-gray-700">The job details you're looking for could not be found.</p>
-          <button 
+          <p className="text-gray-700">
+            The job details you&apos;re looking for could not be found.
+          </p>
+          <button
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
             onClick={() => window.history.back()}
           >

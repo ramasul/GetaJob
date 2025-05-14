@@ -87,8 +87,8 @@ const Unauthorized = () => {
               Access Denied
             </h1>
             <p className="text-blue-800 opacity-80 mb-8">
-              Sorry, you don't have permission to access this page. Please check
-              your credentials or contact support for assistance.
+              Sorry, you don&apos;t have permission to access this page. Please
+              check your credentials or contact support for assistance.
             </p>
 
             {user ? (
