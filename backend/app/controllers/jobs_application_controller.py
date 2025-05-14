@@ -108,19 +108,6 @@ class JobApplicationController:
             
         return applications
 
-    async def get_applications_by_job(self, job_id: str) -> List[JobApplicationResponse]:
-        """Mengambil smeua applications untuk job tertentu"""
-        applications = []
-        cursor = self.collection.find({"job_id": ObjectId(job_id)})
-        
-        async for doc in cursor:
-            doc["_id"] = str(doc["_id"])
-            doc["applier_id"] = str(doc["applier_id"])
-            doc["job_id"] = str(doc["job_id"])
-            applications.append(JobApplicationResponse(**doc))
-            
-        return applications
-
     async def update_application(self, application_id: str, update_data: JobApplicationUpdate) -> JobApplicationResponse:
         """Update job application"""
         try:
@@ -191,4 +178,122 @@ class JobApplicationController:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error deleting application: {str(e)}"
+            )
+    
+    async def get_applier_count_by_job_id(self, job_id: str) -> int:
+        """Get total applier untuk job_id tertentu"""
+        try:
+            count = await self.collection.count_documents({"job_id": ObjectId(job_id)})
+            return count
+        except Exception as e:
+            logger.error(f"Error getting applier count: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+    
+    async def get_applier_job_history(self, applier_id: str, skip: int = 0, limit: int = 10):
+        """Get detaiil applier job application history"""
+        try:
+            pipeline = [
+                {"$match": {"applier_id": ObjectId(applier_id)}},
+                {"$skip": skip},
+                {"$limit": limit},
+                {
+                    "$lookup": {
+                        "from": "jobs",
+                        "localField": "job_id",
+                        "foreignField": "_id",
+                        "as": "job_details"
+                    }
+                },
+                {"$unwind": "$job_details"},
+                {
+                    "$project": {
+                        "_id": 1,
+                        "document_url": 1,
+                        "motivational_letter": 1,
+                        "created_at": 1,
+                        "job_details": {
+                            "_id": 1,
+                            "job_title": 1,
+                            "company_name": 1,
+                            "location": 1,
+                            "employment_type": 1,
+                            "salary_range": 1,
+                            "minimum_education": 1,
+                            "required_skills": 1,
+                            "status": 1,
+                            "recruiter_id": 1
+                        }
+                    }
+                }
+            ]
+            
+            applications = []
+            cursor = self.collection.aggregate(pipeline)
+            async for doc in cursor:
+                # Convert ObjectIds to strings
+                doc["_id"] = str(doc["_id"])
+                doc["job_details"]["_id"] = str(doc["job_details"]["_id"])
+                doc["job_details"]["recruiter_id"] = str(doc["job_details"]["recruiter_id"])
+                applications.append(doc)
+            
+            return applications
+        except Exception as e:
+            logger.error(f"Error getting applier job history: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
+
+    async def get_applications_by_job_id(self, job_id: str, skip: int = 0, limit: int = 10):
+        """Mengambil smeua applications untuk job tertentu"""
+        try:
+            pipeline = [
+                {"$match": {"job_id": ObjectId(job_id)}},
+                {"$skip": skip},
+                {"$limit": limit},
+                {
+                    "$lookup": {
+                        "from": "appliers",
+                        "localField": "applier_id",
+                        "foreignField": "_id",
+                        "as": "applier_details"
+                    }
+                },
+                {"$unwind": "$applier_details"},
+                {
+                    "$project": {
+                        "_id": 1,
+                        "document_url": 1,
+                        "motivational_letter": 1,
+                        "created_at": 1,
+                        "applier_details": {
+                            "_id": 1,
+                            "name": 1,
+                            "email": 1,
+                            "phone_number": 1,
+                            "address": 1,
+                            "last_education": 1,
+                            "resume_url": 1
+                        }
+                    }
+                }
+            ]
+            
+            applications = []
+            cursor = self.collection.aggregate(pipeline)
+            async for doc in cursor:
+                # Convert ObjectIds to strings
+                doc["_id"] = str(doc["_id"])
+                doc["applier_details"]["_id"] = str(doc["applier_details"]["_id"])
+                applications.append(doc)
+            
+            return applications
+        except Exception as e:
+            logger.error(f"Error getting appliers by job ID: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
             )
