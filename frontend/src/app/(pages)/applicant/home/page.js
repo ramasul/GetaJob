@@ -15,6 +15,7 @@ import { useAuth } from "@auth/context";
 import JobCarousel from "@/app/components/JobCarousel";
 import { set } from "zod";
 import Loading from "@/app/components/Loading";
+import { Suspense } from "react";
 
 function JobSearchContent() {
   const [jobs, setJobs] = useState([]);
