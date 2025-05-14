@@ -122,25 +122,6 @@ export default function ApplierProfile() {
     return <Loading />;
   }
 
-  if (!applier) {
-    return (
-      <div className="min-h-screen bg-gradient-to-tr from-[#45D1DD] to-gray-300 flex items-center justify-center">
-        <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg p-8 text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-gray-700">
-            Failed to load profile data. Please try again later.
-          </p>
-          <button
-            className="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-4 rounded"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <ProtectedRoute userType="applier">
       <div className="min-h-screen bg-gradient-to-tr from-cyan-400 to-cyan-200">
