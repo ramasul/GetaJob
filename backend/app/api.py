@@ -33,7 +33,7 @@ app = FastAPI(
 # CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "127.0.0.1"],  # In production, replace with specific origins
+    allow_origins=["http://localhost:3000", "127.0.0.1", "https://geta-job.vercel.app"],  # In production, replace with specific origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
