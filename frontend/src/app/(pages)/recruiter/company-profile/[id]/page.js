@@ -1,38 +1,38 @@
 // pages/companies/[id].js
-import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import {
-  ArrowLeft, Mail, Phone, Globe, MapPin, Building
-} from 'lucide-react';
-import Header from '@/app/components/Header';
+import Head from "next/head";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Mail, Phone, Globe, MapPin, Building } from "lucide-react";
+import Header from "@/app/components/Header";
 
 // Fetch company data from API
 export async function getServerSideProps(context) {
   const { id } = context.params;
-  
+
   try {
     // Fetch data from your API
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/companies/${id}`);
-    
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/companies/${id}`
+    );
+
     if (!res.ok) {
-      throw new Error('Failed to fetch company data');
+      throw new Error("Failed to fetch company data");
     }
-    
+
     const company = await res.json();
-    
+
     return {
       props: {
         company,
       },
     };
   } catch (error) {
-    console.error('Error fetching company data:', error);
+    console.error("Error fetching company data:", error);
     return {
       props: {
         company: null,
-        error: 'Failed to load company data',
+        error: "Failed to load company data",
       },
     };
   }
@@ -43,7 +43,11 @@ export default function CompanyProfile({ company, error }) {
 
   // Show loading state
   if (router.isFallback) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
   }
 
   // Show error state
@@ -52,8 +56,11 @@ export default function CompanyProfile({ company, error }) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-600">Error</h1>
-          <p className="mt-2">{error || 'Could not load company data'}</p>
-          <Link href="/companies" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md">
+          <p className="mt-2">{error || "Could not load company data"}</p>
+          <Link
+            href="/companies"
+            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-md"
+          >
             Back to Companies
           </Link>
         </div>
@@ -67,14 +74,19 @@ export default function CompanyProfile({ company, error }) {
     company.address.city,
     company.address.state,
     company.address.country,
-    company.address.postal_code
-  ].filter(Boolean).join(", ");
+    company.address.postal_code,
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-300 to-cyan-100 py-8 px-4">
       <Head>
         <title>{company.company_name} | Company Dashboard</title>
-        <meta name="description" content={`Profile for ${company.company_name}`} />
+        <meta
+          name="description"
+          content={`Profile for ${company.company_name}`}
+        />
       </Head>
 
       <Header currentPage="dashboard" userType="admin" />
@@ -86,7 +98,9 @@ export default function CompanyProfile({ company, error }) {
               <Link href="/companies" className="mr-3">
                 <ArrowLeft className="h-6 w-6 text-gray-700" />
               </Link>
-              <h1 className="text-2xl font-bold text-gray-800">Company Details</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Company Details
+              </h1>
             </div>
           </div>
 
@@ -99,17 +113,41 @@ export default function CompanyProfile({ company, error }) {
                     <Building className="h-12 w-12 text-gray-400" />
                   </div>
                 </div>
-                <h2 className="text-xl font-bold text-gray-800">{company.company_name}</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {company.company_name}
+                </h2>
                 <p className="text-gray-500">{company.company_type}</p>
               </div>
 
               <div className="border-t pt-4">
-                <h3 className="font-medium text-gray-800 mb-4">Contact Information</h3>
+                <h3 className="font-medium text-gray-800 mb-4">
+                  Contact Information
+                </h3>
                 <div className="space-y-4">
-                  <ContactItem icon={Mail} label="Email" value={company.email} href={`mailto:${company.email}`} />
-                  <ContactItem icon={Phone} label="Phone" value={company.phone} href={`tel:${company.phone}`} />
-                  <ContactItem icon={Globe} label="Website" value={company.website_url} href={company.website_url} />
-                  <ContactItem icon={MapPin} label="Address" value={fullAddress} href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`} />
+                  <ContactItem
+                    icon={Mail}
+                    label="Email"
+                    value={company.email}
+                    href={`mailto:${company.email}`}
+                  />
+                  <ContactItem
+                    icon={Phone}
+                    label="Phone"
+                    value={company.phone}
+                    href={`tel:${company.phone}`}
+                  />
+                  <ContactItem
+                    icon={Globe}
+                    label="Website"
+                    value={company.website_url}
+                    href={company.website_url}
+                  />
+                  <ContactItem
+                    icon={MapPin}
+                    label="Address"
+                    value={fullAddress}
+                    href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`}
+                  />
                 </div>
               </div>
             </div>
@@ -117,7 +155,9 @@ export default function CompanyProfile({ company, error }) {
             {/* Right Column */}
             <div className="md:col-span-2">
               <div className="bg-white p-6 rounded-xl border mb-6">
-                <h3 className="font-medium text-gray-800 mb-4">Company Information</h3>
+                <h3 className="font-medium text-gray-800 mb-4">
+                  Company Information
+                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Field label="Company Name" value={company.company_name} />
                   <Field label="Company Type" value={company.company_type} />
@@ -127,26 +167,36 @@ export default function CompanyProfile({ company, error }) {
               </div>
 
               <div className="bg-white p-6 rounded-xl border">
-                <h3 className="font-medium text-gray-800 mb-4">Company Description</h3>
+                <h3 className="font-medium text-gray-800 mb-4">
+                  Company Description
+                </h3>
                 <div className="mb-6">
                   <p className="text-gray-700">{company.company_description}</p>
                 </div>
 
                 <div className="mb-6">
-                  <h4 className="font-medium text-gray-800 mb-3">Address Details</h4>
+                  <h4 className="font-medium text-gray-800 mb-3">
+                    Address Details
+                  </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Field label="Street" value={company.address.street} />
                     <Field label="City" value={company.address.city} />
-                    <Field label="State/Province" value={company.address.state} />
+                    <Field
+                      label="State/Province"
+                      value={company.address.state}
+                    />
                     <Field label="Country" value={company.address.country} />
-                    <Field label="Postal Code" value={company.address.postal_code} />
+                    <Field
+                      label="Postal Code"
+                      value={company.address.postal_code}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>  
+      </div>
     </div>
   );
 }
@@ -163,13 +213,15 @@ function Field({ label, value }) {
 
 function ContactItem({ icon: Icon, label, value, href }) {
   if (!value) return null;
-  
+
   return (
     <div className="flex items-start">
       <Icon className="h-5 w-5 text-gray-400 mr-3 mt-0.5" />
       <div>
         <p className="text-gray-500 text-sm">{label}</p>
-        <a href={href} className="text-blue-600 text-sm hover:underline">{value}</a>
+        <a href={href} className="text-blue-600 text-sm hover:underline">
+          {value}
+        </a>
       </div>
     </div>
   );
