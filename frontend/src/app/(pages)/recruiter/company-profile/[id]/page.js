@@ -1,3 +1,4 @@
+"use client";
 // pages/companies/[id].js
 import Head from "next/head";
 import Image from "next/image";
