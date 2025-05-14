@@ -10,10 +10,15 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { applierService } from "@/app/api/applierService";
 import { jobService } from "@/app/api/jobService";
+import { aiService } from "@/app/api/aiService";
 import { useAuth } from "@auth/context";
+import JobCarousel from "@/app/components/JobCarousel";
+import { set } from "zod";
+import Loading from "@/app/components/Loading";
 
 export default function JobSearch() {
   const [jobs, setJobs] = useState([]);
+  const [jobRecommendations, setJobRecommendations] = useState([]);
   const [showProfilePopup, setShowProfilePopup] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -21,15 +26,15 @@ export default function JobSearch() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
-  const job_per_page = 5;
+  const { user, loading } = useAuth();
+  const job_per_page = 6;
 
   // Debounced search function
   const debouncedSearch = useCallback(
     (query) => {
       const timeoutId = setTimeout(() => {
         router.push(`/applicant/home?query=${query}&page=1`);
-      }, 200);
+      }, 1000);
       return () => clearTimeout(timeoutId);
     },
     [router]
@@ -42,6 +47,28 @@ export default function JobSearch() {
   };
 
   useEffect(() => {
+    const fetchRecommendations = async () => {
+      try {
+        if (user && user.user_type === "applier") {
+          const recommendations = await aiService.getJobRecommendations(
+            user.id
+          );
+          const transformedJobRecommendations = recommendations.map((job) => ({
+            id: job._id,
+            title: job.job_title,
+            company: job.company_name,
+            location: job.location,
+            salary: job.salary_range,
+            description: job.description,
+            profile_picture_url: job.profile_picture_url,
+          }));
+          setJobRecommendations(transformedJobRecommendations);
+        }
+      } catch (error) {
+        console.error("Error fetching job recommendations:", error);
+      }
+    };
+
     const checkProfileAndFetchJobs = async () => {
       try {
         setIsLoading(true);
@@ -59,8 +86,9 @@ export default function JobSearch() {
 
         setSearchQuery(query);
         setCurrentPage(page);
-
         // Fetch jobs
+
+        await fetchRecommendations();
         const response = await jobService.searchJobsWithImage(
           query,
           page,
@@ -76,6 +104,7 @@ export default function JobSearch() {
           description: job.description,
           profile_picture_url: job.profile_picture_url,
         }));
+
         setJobs(transformedJobs);
         setTotalPages(Math.ceil(countResponse / job_per_page));
       } catch (error) {
@@ -95,6 +124,10 @@ export default function JobSearch() {
   const handleClosePopup = () => {
     setShowProfilePopup(false);
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <ProtectedRoute>
@@ -160,9 +193,31 @@ export default function JobSearch() {
           </div>
         </div>
 
+        {user && user.user_type === "applier" && (
+          <div className="px-4 md:px-8">
+            <div className="w-full max-w-7xl mx-auto">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-700 mb-8">
+                For You
+              </h1>
+              {loading ? (
+                <SkeletonGrid count={1} />
+              ) : jobRecommendations.length === 0 ? (
+                <SkeletonGrid count={1} />
+              ) : (
+                <>
+                  <JobCarousel jobs={jobRecommendations} router={router} />
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Job Listings */}
         <div className="px-4 md:px-8 py-8">
           <div className="w-full max-w-7xl mx-auto">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-700 mb-8">
+              Newest Job
+            </h1>
             {isLoading ? (
               <SkeletonGrid count={job_per_page} />
             ) : jobs.length === 0 ? (
@@ -181,9 +236,11 @@ export default function JobSearch() {
                       <div className="flex items-start mb-4">
                         <div className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center mr-3 bg-cyan-100">
                           {job.profile_picture_url ? (
-                            <img
+                            <Image
                               src={job.profile_picture_url}
                               alt="Company Logo"
+                              width={100}
+                              height={100}
                               className="w-full h-full rounded-full object-cover"
                             />
                           ) : (

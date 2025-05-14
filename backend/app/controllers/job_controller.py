@@ -331,3 +331,16 @@ class JobController:
             job["profile_picture_url"] = None
 
         return JobWithImageResponse(**job)
+    
+    async def count_jobs_by_recruiter(self, recruiter_id: str) -> int:
+        """Menghitung jumlah job berdasarkan siapa recruiternya."""
+        try:
+            recruiter_id = ObjectId(recruiter_id)
+        except:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Invalid recruiter_id format"
+            )
+
+        count = await self.collection.count_documents({"recruiter_id": recruiter_id})
+        return count
