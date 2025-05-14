@@ -126,10 +126,10 @@ export default function ApplierProfile() {
     <ProtectedRoute userType="applier">
       <div className="min-h-screen bg-gradient-to-tr from-cyan-400 to-cyan-200">
         <Header currentPage="profile" userType="applicant" />
-        <div className="max-w-6xl mx-auto py-8 px-4">
+        <div className="max-w-6xl mx-auto py-8 px-2 sm:px-4">
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div className="flex items-center">
                   <Link href="/applicant/home" className="mr-3">
                     <ArrowLeft className="h-6 w-6 text-gray-700" />
@@ -138,17 +138,17 @@ export default function ApplierProfile() {
                     Applicant Profile
                   </h1>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => setShowResumeUpload(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors cursor-pointer"
+                    className="flex items-center gap-2 w-full sm:w-auto px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors cursor-pointer justify-center"
                   >
                     <Upload className="h-5 w-5" />
                     <span>Upload Resume</span>
                   </button>
                   <button
                     onClick={() => setShowRateResume(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition-colors cursor-pointer"
+                    className="flex items-center gap-2 w-full sm:w-auto px-4 py-2 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition-colors cursor-pointer justify-center"
                   >
                     <span>Rate My Resume</span>
                   </button>
@@ -157,9 +157,9 @@ export default function ApplierProfile() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Left Column */}
-                <div className="bg-white p-6 rounded-xl border">
+                <div className="bg-white p-4 sm:p-6 rounded-xl border">
                   <div className="flex flex-col items-center mb-4">
-                    <div className="relative w-48 h-48 mb-3 group">
+                    <div className="relative w-32 h-32 sm:w-48 sm:h-48 mb-3 group">
                       {applier?.profile_picture_url ? (
                         <Image
                           src={applier.profile_picture_url}

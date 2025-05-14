@@ -118,11 +118,11 @@ export default function JobDetail() {
         <Header currentPage="browse-companies" />
 
         {/* Job Detail Content */}
-        <div className="px-6 py-8">
+        <div className="px-2 sm:px-6 py-6 sm:py-8">
           <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
             {/* Left Column - Company Info */}
             <div className="w-full md:w-1/3">
-              <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-6">
+              <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-4 sm:p-6">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold text-blue-600 mb-1">
                     {company.title}
@@ -258,7 +258,7 @@ export default function JobDetail() {
 
             {/* Right Column - Job Details */}
             <div className="w-full md:w-2/3">
-              <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-6 mb-6">
+              <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-4 sm:p-6 mb-6">
                 <div className="mb-6">
                   <h1 className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">
                     {job.title}
@@ -316,17 +316,17 @@ export default function JobDetail() {
                   </div>
                 )}
                 {user && user.user_type === "applier" && (
-                  <div className="flex justify-between">
+                  <div className="flex flex-col md:flex-row gap-3 md:gap-4 mt-6">
                     <button
                       onClick={handleJobRate}
-                      className="px-6 py-2.5 text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors flex font-medium items-center cursor-pointer"
+                      className="px-6 py-2.5 text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors flex font-medium items-center cursor-pointer w-full md:w-auto justify-center"
                     >
                       <span className="mr-2">Am I A Good Fit?</span>
                     </button>
 
                     <button
                       onClick={handleSubmitApplication}
-                      className="px-6 py-2.5 text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors flex font-medium items-center cursor-pointer"
+                      className="px-6 py-2.5 text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg transition-colors flex font-medium items-center cursor-pointer w-full md:w-auto justify-center"
                     >
                       <span className="mr-2">Submit Application</span>
                       <svg
