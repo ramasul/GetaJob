@@ -187,6 +187,38 @@ class RecruiterController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error updating recruiter: {str(e)}",
             )
+        
+    async def clear_recruiter_picture(self, recruiter_id: str) -> bool:
+        """Menghapus foto recruiter"""
+        try:
+            recruiter = await self.collection.find_one({"_id": ObjectId(recruiter_id)})
+            if recruiter is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Recruiter with ID {recruiter_id} not found",
+                )
+
+            result = await self.collection.update_one(
+                {"_id": ObjectId(recruiter_id)},
+                {"$set": {"profile_picture_url": None, "updated_at": datetime.now()}},
+            )
+
+            if result.modified_count == 0 and result.matched_count == 1:
+                pass
+            elif result.modified_count == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to clear profile picture"
+                )
+            
+            return True
+
+        except Exception as e:
+            logger.error(f"Error clearing profile picture: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error clearing profile picture: {str(e)}",
+            )
 
     async def change_password(
         self, recruiter_id: str, current_password: str, new_password: str

@@ -71,6 +71,15 @@ async def update_applier(
     """Update data applier berdasarkan ID"""
     return await controller.update_applier(applier_id, applier)
 
+@router.put("/{applier_id}/clear-profile-picture", status_code=status.HTTP_200_OK)
+async def clear_applier_profile_picture(
+    applier_id: str,
+    controller: ApplierController = Depends(get_applier_controller),
+    user = Depends(owner_of("applier_id", "applier"))
+):
+    """API untuk menghapus foto profil applier berdasarkan ID"""
+    return await controller.clear_applier_picture(applier_id)
+
 @router.put("/{applier_id}/update-resume", status_code=status.HTTP_200_OK)
 async def update_applier_resume(
     applier_id: str,

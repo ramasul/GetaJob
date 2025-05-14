@@ -10,6 +10,7 @@ from app.models.recruiter_model import (
     RecruiterResponse,
     ChangePasswordRequest
 )
+from app.middleware.permissions import *
 
 router = APIRouter(prefix="/recruiters", tags=["Recruiters"])
 
@@ -66,6 +67,15 @@ async def update_recruiter(
 ):
     """Update data recruiter berdasarkan ID"""
     return await controller.update_recruiter(recruiter_id, recruiter_update)
+
+@router.put("/{recruiter_id}/clear-profile-picture", status_code=status.HTTP_200_OK)
+async def clear_recruiter_profile_picture(
+    recruiter_id: str,
+    controller: RecruiterController = Depends(get_recruiter_controller),
+    user = Depends(owner_of("recruiter_id", "recruiter"))
+):
+    """API untuk menghapus foto profil recruiter berdasarkan ID"""
+    return await controller.clear_recruiter_picture(recruiter_id)
 
 @router.post("/{recruiter_id}/change-password")
 async def change_password(
