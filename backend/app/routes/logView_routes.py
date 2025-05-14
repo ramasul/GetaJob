@@ -29,6 +29,22 @@ async def get_logs_by_applier(
     """API untuk mendapatkan semua log view berdasarkan applier_id"""
     return await controller.get_logs_by_applier(applier_id, limit)
 
+@router.get("/applier/{applier_id}/count", response_model=int)
+async def get_log_count_by_applier(
+    applier_id: str,
+    controller: LogViewController = Depends(get_log_view_controller)
+):
+    """API untuk mendapatkan jumlah log view berdasarkan applier_id"""
+    return await controller.count_logs_by_applier(applier_id)
+
+@router.get("/job/{job_id}/count", response_model=int)
+async def get_log_count_by_job(
+    job_id: str,
+    controller: LogViewController = Depends(get_log_view_controller)
+):
+    """API untuk mendapatkan jumlah log view berdasarkan job_id"""
+    return await controller.count_logs_by_job(job_id)
+
 @router.get("/job/{job_id}", response_model=List[LogViewResponse])
 async def get_logs_by_job(
     job_id: str,

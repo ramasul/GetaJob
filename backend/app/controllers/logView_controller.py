@@ -82,3 +82,15 @@ class LogViewController:
             
         return [LogViewResponse(**log) for log in logs]
     
+    async def count_logs_by_applier(self, applier_id: str) -> int:
+        """Menghitung jumlah log view berdasarkan applier_id"""
+        applier_obj_id = ObjectId(applier_id)
+        count = await self.collection.count_documents({"applier_id": applier_obj_id})
+        return count
+    
+    async def count_logs_by_job(self, job_id: str) -> int:
+        """Menghitung jumlah log view berdasarkan job_id"""
+        job_obj_id = ObjectId(job_id)
+        count = await self.collection.count_documents({"job_id": job_obj_id})
+        return count
+    
