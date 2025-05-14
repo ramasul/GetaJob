@@ -15,6 +15,7 @@ from app.routes.job_routes import router as job_router
 from app.routes.logView_routes import router as log_view_router
 from app.routes.recommendation_route import router as recommendation_router
 from app.routes.resume_routes import router as resume_router
+from app.routes.jobs_application_routes import router as job_application_router
 
 load_dotenv()
 # Konfigurasi logging
@@ -47,6 +48,7 @@ app.include_router(job_router)
 app.include_router(log_view_router)
 app.include_router(recommendation_router)
 app.include_router(resume_router)
+app.include_router(job_application_router)
 
 api_router = APIRouter()
 
