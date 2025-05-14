@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import axios from "axios";
+import { DEFAULT_IMAGE } from "@/app/utils/constant";
+import { jobService } from "@/app/api/jobService";
 
 export default function JobDetail() {
   const params = useParams();
@@ -19,12 +21,8 @@ export default function JobDetail() {
     const fetchJobData = async () => {
       try {
         setLoading(true);
-        // Fetch job details
-        const jobResponse = await axios.get(
-          `https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/${jobId}`
-        );
-        
-        const jobData = jobResponse.data;
+
+        const jobData = await jobService.getJobByID(jobId);
         setJob({
           title: jobData.job_title,
           description: jobData.description,
@@ -39,19 +37,19 @@ export default function JobDetail() {
         const companyResponse = await axios.get(
           `https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/recruiters/${recruiterId}`
         );
-        
+
         const companyData = companyResponse.data;
         setCompany({
           title: companyData.company_name,
           image: "/image/map.png", // Default image - you might want to add this field to your API
-          location: `${companyData.address?.street || ''}, ${companyData.address?.city || ''}, ${companyData.address?.state || ''}, ${companyData.address?.country || ''}`,
+          location: `${companyData.address?.street || ""}, ${companyData.address?.city || ""}, ${companyData.address?.state || ""}, ${companyData.address?.country || ""}`,
           employeeQuantity: "N/A", // Not in API data, could be added later
           industry: companyData.company_type,
           email: companyData.email,
           phone: companyData.phone,
           companyDescription: companyData.company_description,
         });
-        
+
         setLoading(false);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -84,7 +82,7 @@ export default function JobDetail() {
         <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-700">{error}</p>
-          <button 
+          <button
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
             onClick={() => window.history.back()}
           >
@@ -100,8 +98,10 @@ export default function JobDetail() {
       <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300 flex items-center justify-center">
         <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg p-8 text-center">
           <h2 className="text-xl font-bold text-red-600 mb-4">Not Found</h2>
-          <p className="text-gray-700">The job details you're looking for could not be found.</p>
-          <button 
+          <p className="text-gray-700">
+            The job details you&apos;re looking for could not be found.
+          </p>
+          <button
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
             onClick={() => window.history.back()}
           >
@@ -270,7 +270,7 @@ export default function JobDetail() {
                 <h3 className="font-medium text-gray-800 mb-3">
                   About Company
                 </h3>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 whitespace-pre-line">
                   {company.companyDescription}
                 </p>
               </div>
@@ -301,7 +301,9 @@ export default function JobDetail() {
                     </span>
                   )}
                 </div>
-                <p className="text-gray-700 mb-6">{job.description}</p>
+                <p className="text-gray-700 mb-6 whitespace-pre-line">
+                  {job.description}
+                </p>
               </div>
 
               {job.requirements && job.requirements.length > 0 && (
@@ -337,7 +339,7 @@ export default function JobDetail() {
 
               <div className="flex justify-end">
                 <button className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-8 rounded-lg transition-colors duration-200 flex items-center shadow-lg">
-                  <span className="mr-2">Submit CV</span>
+                  <span className="mr-2">Submit Application</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
