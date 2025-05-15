@@ -55,7 +55,7 @@ export default function ApplierAskSuitability({ applierId, jobId, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 sm:p-8 relative">
+      <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 sm:p-8 relative max-h-[80vh] overflow-y-auto overscroll-contain">
         <button
           onClick={handleClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 cursor-pointer"
