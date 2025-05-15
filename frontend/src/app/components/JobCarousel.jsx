@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight, MapPin, DollarSign } from "lucide-react";
+import Image from "next/image";
+import { DEFAULT_IMAGE } from "../utils/constant";
 
 export default function JobCarousel({ jobs = [], router }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -154,9 +156,13 @@ export default function JobCarousel({ jobs = [], router }) {
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <span className="text-cyan-600 font-bold text-lg">
-                        {job.company.charAt(0)}
-                      </span>
+                      <Image
+                        src={DEFAULT_IMAGE}
+                        alt="Company Logo"
+                        width={100}
+                        height={100}
+                        className="w-full h-full rounded-full object-cover"
+                      />
                     )}
                   </div>
                   <div>

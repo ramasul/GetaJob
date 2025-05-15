@@ -8,24 +8,28 @@ export default function Header({ currentPage, userType }) {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const menuItems =
-    userType === "recruiter"
-      ? [
-          {
-            name: "Company Profile",
-            href: "/recruiter/company-profile",
-            key: "company-profile",
-          },
-          { name: "Dashboard", href: "/recruiter/dashboard", key: "dashboard" },
-        ]
-      : [
-          { name: "Profile", href: "/applicant/profile", key: "profile" },
-          {
-            name: "Browse Companies",
-            href: "/applicant/home",
-            key: "browse-companies",
-          },
-        ];
+  // Define menu items based on user type
+  let menuItems = [];
+
+  if (userType === "recruiter") {
+    menuItems = [
+      {
+        name: "My Profile",
+        href: "/recruiter/company-profile",
+        key: "company-profile",
+      },
+      { name: "Dashboard", href: "/recruiter/dashboard", key: "dashboard" },
+      { name: "Browse Job", href: "/home", key: "browse-job" },
+    ];
+  } else if (userType === "applier") {
+    menuItems = [
+      { name: "My Profile", href: "/applicant/profile", key: "profile" },
+      { name: "Browse Job", href: "/home", key: "browse-job" },
+    ];
+  } else {
+    // Default menu for users that are neither applier nor recruiter
+    menuItems = [{ name: "Browse Job", href: "/home", key: "browse-job" }];
+  }
 
   const handleLogout = async () => {
     await logout();
@@ -69,12 +73,7 @@ export default function Header({ currentPage, userType }) {
                     currentPage === item.key
                       ? "text-blue-600 font-bold"
                       : "text-gray-700"
-                  } ${
-                    currentPage === "browse-companies" &&
-                    item.key === "browse-companies"
-                      ? "text-blue-600"
-                      : ""
-                  }`}
+                  } hover:text-blue-500 transition-colors duration-150`}
                 >
                   {item.name}
                 </a>
@@ -114,12 +113,14 @@ export default function Header({ currentPage, userType }) {
           </button>
 
           {/* Right side: Logout (desktop) */}
-          <button
-            onClick={handleLogout}
-            className="hidden md:block bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm lg:text-base font-semibold px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 rounded-full transition-colors duration-150 cursor-pointer"
-          >
-            Log out
-          </button>
+          {(userType === "applier" || userType === "recruiter") && (
+            <button
+              onClick={handleLogout}
+              className="hidden md:block bg-red-500 hover:bg-red-600 text-white text-xs sm:text-sm lg:text-base font-semibold px-3 sm:px-4 lg:px-6 py-1.5 sm:py-2 rounded-full transition-colors duration-150 cursor-pointer"
+            >
+              Log out
+            </button>
+          )}
         </div>
 
         {/* Mobile Navigation Menu */}
@@ -134,18 +135,20 @@ export default function Header({ currentPage, userType }) {
                     currentPage === item.key
                       ? "text-blue-600 font-bold"
                       : "text-gray-700"
-                  } px-2 py-1 rounded-lg block`}
+                  } px-2 py-1 rounded-lg block hover:bg-gray-100 transition-colors duration-150`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
                 </a>
               ))}
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold px-2 py-1.5 rounded-lg mt-2 text-sm text-center transition-colors duration-150 cursor-pointer"
-              >
-                Log out
-              </button>
+              {(userType === "applier" || userType === "recruiter") && (
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold px-2 py-1.5 rounded-lg mt-2 text-sm text-center transition-colors duration-150 cursor-pointer"
+                >
+                  Log out
+                </button>
+              )}
             </nav>
           </div>
         )}

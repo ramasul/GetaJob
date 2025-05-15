@@ -125,13 +125,13 @@ export default function ApplierProfile() {
   return (
     <ProtectedRoute userType="applier">
       <div className="min-h-screen bg-gradient-to-tr from-cyan-400 to-cyan-200">
-        <Header currentPage="profile" userType="applicant" />
+        <Header currentPage="profile" userType={user?.user_type} />
         <div className="max-w-6xl mx-auto py-8 px-2 sm:px-4">
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div className="flex items-center">
-                  <Link href="/applicant/home" className="mr-3">
+                  <Link href="/home" className="mr-3">
                     <ArrowLeft className="h-6 w-6 text-gray-700" />
                   </Link>
                   <h1 className="text-2xl font-bold text-gray-800">

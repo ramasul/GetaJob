@@ -100,7 +100,7 @@ export default function CompanyProfile() {
   return (
     <ProtectedRoute userType="recruiter">
       <div className="min-h-screen bg-gradient-to-tr from-cyan-400 to-cyan-200">
-        <Header currentPage="profile" userType="recruiter" />
+        <Header currentPage="company-profile" userType={user?.user_type} />
         <div className="max-w-6xl mx-auto py-8 px-2 sm:px-4">
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-4 sm:p-6">

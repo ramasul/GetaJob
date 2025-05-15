@@ -126,7 +126,7 @@ export default function JobDetail() {
     <ProtectedRoute>
       <div className="min-h-screen w-full bg-gradient-to-tr from-cyan-400 to-cyan-200">
         {/* Header/Navigation */}
-        <Header currentPage="browse-companies" />
+        <Header currentPage="job-detail" userType={user?.user_type} />
 
         {/* Job Detail Content */}
         <div className="px-2 sm:px-6 py-6 sm:py-8">

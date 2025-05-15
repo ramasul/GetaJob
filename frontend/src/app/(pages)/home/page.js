@@ -13,10 +13,10 @@ import { jobService } from "@/app/api/jobService";
 import { aiService } from "@/app/api/aiService";
 import { useAuth } from "@auth/context";
 import JobCarousel from "@/app/components/JobCarousel";
-import { set } from "zod";
 import Loading from "@/app/components/Loading";
 import { Suspense } from "react";
 import { logService } from "@/app/api/logService";
+import { DEFAULT_IMAGE } from "@/app/utils/constant";
 
 function JobSearchContent() {
   const [jobs, setJobs] = useState([]);
@@ -36,7 +36,7 @@ function JobSearchContent() {
   const debouncedSearch = useCallback(
     (query) => {
       const timeoutId = setTimeout(() => {
-        router.push(`/applicant/home?query=${query}&page=1`);
+        router.push(`/home?query=${query}&page=1`);
       }, 1000);
       return () => clearTimeout(timeoutId);
     },
@@ -139,7 +139,7 @@ function JobSearchContent() {
   };
 
   const handlePageChange = (page) => {
-    router.push(`/applicant/home?query=${searchQuery}&page=${page}`);
+    router.push(`/home?query=${searchQuery}&page=${page}`);
   };
 
   const handleClosePopup = () => {
@@ -153,7 +153,7 @@ function JobSearchContent() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen w-full bg-gradient-to-tr from-cyan-400 to-cyan-200">
-        <Header currentPage="browse-companies" userType="applicant" />
+        <Header currentPage="browse-job" userType={user?.user_type} />
 
         {/* Profile Picture Popup */}
         {showProfilePopup && <ProfilePicturePopup onClose={handleClosePopup} />}
@@ -263,9 +263,13 @@ function JobSearchContent() {
                               className="w-full h-full rounded-full object-cover"
                             />
                           ) : (
-                            <span className="text-cyan-600 font-bold text-lg">
-                              {job.company.charAt(0)}
-                            </span>
+                            <Image
+                              src={DEFAULT_IMAGE}
+                              alt="Company Logo"
+                              width={100}
+                              height={100}
+                              className="w-full h-full rounded-full object-cover"
+                            />
                           )}
                         </div>
 
