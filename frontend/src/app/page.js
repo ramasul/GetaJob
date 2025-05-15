@@ -15,7 +15,7 @@ export default function LandingPage() {
       if (user.user_type === "recruiter") {
         dashboardPath = "/recruiter/dashboard";
       } else if (user.user_type === "applier") {
-        dashboardPath = "/applicant/home"; // Tolong nanti disesuaikan menjadi applier/home bukan applicant
+        dashboardPath = "/home"; // Tolong nanti disesuaikan menjadi applier/home bukan applicant
       }
 
       const redirectParam =
@@ -41,7 +41,7 @@ export default function LandingPage() {
               height={40}
               className="w-10 h-10"
             />
-            <span className="text-cyan-700 text-xl font-bold">Get a Job</span>
+            <span className="text-cyan-700 text-xl font-bold">GetaJob</span>
           </div>
           <div className="flex items-center space-x-4">
             <button
@@ -109,7 +109,7 @@ export default function LandingPage() {
       {/* Features Section */}
       <div className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-cyan-700 text-center mb-12">
-          Why Choose Get a Job?
+          Why Choose GetaJob?
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white/90 backdrop-blur-md rounded-xl p-6 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-200">
