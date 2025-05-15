@@ -148,7 +148,7 @@ export default function RateMyResumePopup({ onClose, userId }) {
 
             {/* Strengths */}
             <div className="bg-white rounded-lg border p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2 whitespace-pre-line">
                 Strengths
               </h3>
               <p className="text-gray-600 whitespace-pre-line">
@@ -158,7 +158,7 @@ export default function RateMyResumePopup({ onClose, userId }) {
 
             {/* Suggestions */}
             <div className="bg-white rounded-lg border p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2 whitespace-pre-line">
                 Suggestions for Improvement
               </h3>
               <p className="text-gray-600 whitespace-pre-line">
