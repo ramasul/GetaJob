@@ -191,6 +191,18 @@ class JobApplicationController:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=str(e)
             )
+        
+    async def get_applier_history_count(self, applier_id: str) -> int:
+        """Get total applier history untuk applier_id tertentu"""
+        try:
+            count = await self.collection.count_documents({"applier_id": ObjectId(applier_id)})
+            return count
+        except Exception as e:
+            logger.error(f"Error getting applier history count: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=str(e)
+            )
     
     async def get_applier_job_history(self, applier_id: str, skip: int = 0, limit: int = 10):
         """Get detaiil applier job application history"""

@@ -52,14 +52,23 @@ async def get_applications_by_job_id(
     """Mendapatkan semua applier untuk job tertentu dengan detail applier"""
     return await controller.get_applications_by_job_id(job_id, skip, limit)
 
-@router.get("/job/{job_id}/count")
+@router.get("/job/{job_id}/count", response_model=int)
 async def get_applier_count_by_job_id(
     job_id: str,
     controller: JobApplicationController = Depends(get_application_controller)
 ):
     """Mendapatkan total jumlah applier untuk job tertentu"""
     count = await controller.get_applier_count_by_job_id(job_id)
-    return {"count": count}
+    return count
+
+@router.get("/applier/{applier_id}/count", response_model=int)
+async def get_job_count_by_applier_id(
+    applier_id: str,
+    controller: JobApplicationController = Depends(get_application_controller)
+):
+    """Mendapatkan total jumlah job yang dilamar oleh applier tertentu"""
+    count = await controller.get_applier_history_count(applier_id)
+    return count
 
 @router.put("/{application_id}", response_model=JobApplicationResponse)
 async def update_application(
