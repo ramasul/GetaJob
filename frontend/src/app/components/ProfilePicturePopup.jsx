@@ -16,7 +16,7 @@ export default function ProfilePicturePopup({ onClose }) {
   const handleOkay = () => {
     setIsVisible(false);
     onClose();
-    router.push("/applicant/home");
+    router.push("/applicant/profile");
   };
 
   if (!isVisible) return null;

@@ -13,6 +13,8 @@ import Loading from "@/app/components/Loading";
 import { useAuth } from "@/app/auth/context";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import ApplierAskSuitability from "@/app/components/ApplierAskSuitability";
+import ApplicationForm from "@/app/components/ApplicationForm";
+import JobNotActive from "@/app/components/JobNotActive";
 
 export default function JobDetail() {
   const { user, loading } = useAuth();
@@ -24,6 +26,7 @@ export default function JobDetail() {
   const [company, setCompany] = useState(null);
   const [job, setJob] = useState(null);
   const [showSuitability, setShowSuitability] = useState(false);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   useEffect(() => {
     const fetchJobData = async () => {
@@ -38,6 +41,7 @@ export default function JobDetail() {
           location: jobData.location,
           employmentType: jobData.employment_type,
           salaryRange: jobData.salary_range,
+          status: jobData.status,
         });
 
         const companyData = await recruiterService.getRecruiterByID(
@@ -66,8 +70,11 @@ export default function JobDetail() {
     }
   }, [jobId]);
 
-  const handleSubmitApplication = async () => {};
-  const handleJobRate = async () => {
+  const handleSubmitApplication = () => {
+    setShowApplicationForm(true);
+  };
+
+  const handleJobRate = () => {
     setShowSuitability(true);
   };
 
@@ -109,6 +116,10 @@ export default function JobDetail() {
         </div>
       </div>
     );
+  }
+
+  if (job.status !== "active") {
+    return <JobNotActive />;
   }
 
   return (
@@ -356,6 +367,13 @@ export default function JobDetail() {
             applierId={user?.id}
             jobId={jobId}
             onClose={() => setShowSuitability(false)}
+          />
+        )}
+
+        {showApplicationForm && (
+          <ApplicationForm
+            jobId={jobId}
+            onClose={() => setShowApplicationForm(false)}
           />
         )}
       </div>

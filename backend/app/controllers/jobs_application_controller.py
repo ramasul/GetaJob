@@ -288,6 +288,7 @@ class JobApplicationController:
                             "phone_number": 1,
                             "address": 1,
                             "last_education": 1,
+                            "profile_picture_url": 1,
                             "resume_url": 1
                         }
                     }
