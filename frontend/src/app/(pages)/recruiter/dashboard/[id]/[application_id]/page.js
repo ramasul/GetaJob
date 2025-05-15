@@ -114,7 +114,7 @@ export default function ApplicationDetails() {
             <div className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div className="flex items-center">
-                  <Link href="/recruiter/applications" className="mr-3">
+                  <Link href="/recruiter/dashboard" className="mr-3">
                     <ArrowLeft className="h-6 w-6 text-gray-700" />
                   </Link>
                   <h1 className="text-2xl font-bold text-gray-800">
