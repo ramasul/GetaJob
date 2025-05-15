@@ -16,21 +16,16 @@ import {
   Award,
   Briefcase,
   Code,
-  Upload,
-  Pencil,
 } from "lucide-react";
 import Header from "@/app/components/Header";
 import ProtectedRoute from "@/app/components/ProtectedRoute";
 import { useAuth } from "@/app/auth/context";
 import Loading from "@/app/components/Loading";
-import { set } from "zod";
 import { applierService } from "@/app/api/applierService";
+import { applicationService } from "@/app/api/applicationService";
 import { DEFAULT_IMAGE } from "@/app/utils/constant";
-import ResumeUploadPopup from "@/app/components/ResumeUploadPopup";
-import { uploadImage } from "@/app/api/cloudinary";
-import ProfilePictureOptions from "@/app/components/ProfilePictureOptions";
-import UploadImage from "@/app/components/UploadImage";
-import RateMyResumePopup from "@/app/components/RateMyResumePopup";
+import { useParams } from "next/navigation";
+import RecruiterRateResumePopup from "@/app/components/RecruiterRateResumePopup";
 
 // Helper to format dates
 const formatDate = (dateString) => {
@@ -43,9 +38,11 @@ const formatDate = (dateString) => {
   });
 };
 
-export default function ApplierProfile() {
+export default function ApplicationDetails() {
   const { user, loading } = useAuth();
+  const params = useParams();
   const [applier, setApplier] = useState(null);
+  const [application, setApplication] = useState(null);
   const [fullAddress, setFullAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
@@ -54,41 +51,48 @@ export default function ApplierProfile() {
     education: false,
     experience: false,
   });
-  const [showResumeUpload, setShowResumeUpload] = useState(false);
-  const [showProfileOptions, setShowProfileOptions] = useState(false);
-  const [showUploadImage, setShowUploadImage] = useState(false);
   const [showRateResume, setShowRateResume] = useState(false);
 
   useEffect(() => {
-    async function fetchApplierData() {
-      if (user) {
+    console.log(params.application_id);
+    async function fetchApplicationData() {
+      if (params.application_id) {
         try {
           setIsLoading(true);
-          const response = await applierService.getApplierByID(user.id);
+          const applicationData = await applicationService.getApplicationByID(
+            params.application_id
+          );
+          setApplication(applicationData);
+
+          const applierResponse = await applierService.getApplierByID(
+            applicationData.applier_id
+          );
           setApplier({
-            ...response,
-            profile_picture_url: response.profile_picture_url || DEFAULT_IMAGE,
-            resume_parsed: response.resume_parsed || {},
+            ...applierResponse,
+            profile_picture_url:
+              applierResponse.profile_picture_url || DEFAULT_IMAGE,
+            resume_parsed: applierResponse.resume_parsed || {},
           });
+
           const addressParts = [
-            response.address?.street,
-            response.address?.city,
-            response.address?.state,
-            response.address?.country,
-            response.address?.postal_code,
+            applierResponse.address?.street,
+            applierResponse.address?.city,
+            applierResponse.address?.state,
+            applierResponse.address?.country,
+            applierResponse.address?.postal_code,
           ]
             .filter(Boolean)
             .join(", ");
           setFullAddress(addressParts);
         } catch (error) {
-          console.error("Error fetching applier data:", error);
+          console.error("Error fetching application data:", error);
         } finally {
           setIsLoading(false);
         }
       }
     }
-    fetchApplierData();
-  }, [user]);
+    fetchApplicationData();
+  }, [params.application_id]);
 
   const toggleSection = (section) => {
     setExpandedSections({
@@ -97,41 +101,20 @@ export default function ApplierProfile() {
     });
   };
 
-  const handleDeleteProfilePicture = async () => {
-    try {
-      await applierService.deleteProfilePicture(user.id);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting profile picture:", error);
-    }
-  };
-
-  const handleSaveProfilePicture = async (croppedImage) => {
-    try {
-      const secure_url = await uploadImage(croppedImage, user.id, "applier");
-      await applierService.updateProfile(user.id, {
-        profile_picture_url: secure_url,
-      });
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating profile picture:", error);
-    }
-  };
-
   if (loading || isLoading) {
     return <Loading />;
   }
 
   return (
-    <ProtectedRoute userType="applier">
+    <ProtectedRoute userType="recruiter">
       <div className="min-h-screen bg-gradient-to-tr from-cyan-400 to-cyan-200">
-        <Header currentPage="profile" userType={user?.user_type} />
+        <Header currentPage="application-detail" userType={user?.user_type} />
         <div className="max-w-6xl mx-auto py-8 px-2 sm:px-4">
           <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <div className="flex items-center">
-                  <Link href="/home" className="mr-3">
+                  <Link href="/recruiter/applications" className="mr-3">
                     <ArrowLeft className="h-6 w-6 text-gray-700" />
                   </Link>
                   <h1 className="text-2xl font-bold text-gray-800">
@@ -140,17 +123,10 @@ export default function ApplierProfile() {
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                   <button
-                    onClick={() => setShowResumeUpload(true)}
-                    className="flex items-center gap-2 w-full sm:w-auto px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors cursor-pointer justify-center"
-                  >
-                    <Upload className="h-5 w-5" />
-                    <span>Upload Resume</span>
-                  </button>
-                  <button
                     onClick={() => setShowRateResume(true)}
                     className="flex items-center gap-2 w-full sm:w-auto px-4 py-2 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition-colors cursor-pointer justify-center"
                   >
-                    <span>Rate My Resume</span>
+                    <span>Score this Resume</span>
                   </button>
                 </div>
               </div>
@@ -159,7 +135,7 @@ export default function ApplierProfile() {
                 {/* Left Column */}
                 <div className="bg-white p-4 sm:p-6 rounded-xl border">
                   <div className="flex flex-col items-center mb-4">
-                    <div className="relative w-32 h-32 sm:w-48 sm:h-48 mb-3 group">
+                    <div className="relative w-32 h-32 sm:w-48 sm:h-48 mb-3">
                       {applier?.profile_picture_url ? (
                         <Image
                           src={applier.profile_picture_url}
@@ -175,12 +151,6 @@ export default function ApplierProfile() {
                           </span>
                         </div>
                       )}
-                      <div
-                        className="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
-                        onClick={() => setShowProfileOptions(true)}
-                      >
-                        <Pencil className="h-6 w-6 text-white" />
-                      </div>
                     </div>
                     <h2 className="text-xl font-bold text-gray-800">
                       {applier?.name || "No Name"}
@@ -194,21 +164,16 @@ export default function ApplierProfile() {
                   <div className="border-t pt-4 mb-6">
                     <div className="flex justify-between mb-1">
                       <span className="text-gray-700 font-medium">
-                        Member Since
+                        Application Date
                       </span>
                       <span className="text-gray-500 text-sm">
-                        {formatDate(applier?.created_at)}
+                        {formatDate(application?.created_at)}
                       </span>
                     </div>
                     <div className="mt-3">
                       <h3 className="font-medium text-gray-800">
                         {applier?.username || "No Username"}
                       </h3>
-                      <div className="flex gap-2 text-sm mt-1 text-gray-500">
-                        <span>
-                          Last Updated: {formatDate(applier?.updated_at)}
-                        </span>
-                      </div>
                     </div>
                   </div>
 
@@ -275,11 +240,39 @@ export default function ApplierProfile() {
                   </div>
 
                   <div className="bg-white p-6 rounded-xl border mb-6">
+                    <h3 className="font-medium text-gray-800 mb-4">
+                      Motivational Letter
+                    </h3>
+                    <div className="mb-3">
+                      <p className="text-gray-700 whitespace-pre-line">
+                        {application?.motivational_letter ||
+                          "No motivational letter provided."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-xl border mb-6">
                     <h3 className="font-medium text-gray-800 mb-4">Bio</h3>
                     <div className="mb-3">
                       <p className="text-gray-700">
                         {applier?.bio || "No bio provided."}
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-xl border mb-6">
+                    <h3 className="font-medium text-gray-800 mb-4">
+                      Portofolio or Additional Document Url
+                    </h3>
+                    <div className="mb-3 text-blue-500">
+                      <a
+                        href={application?.document_url || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {application?.document_url ||
+                          "No Portofolio or Additional Document Url."}
+                      </a>
                     </div>
                   </div>
 
@@ -455,36 +448,11 @@ export default function ApplierProfile() {
             </div>
           </div>
         </div>
-
-        {showResumeUpload && (
-          <ResumeUploadPopup
-            onClose={() => setShowResumeUpload(false)}
-            userId={user?.id}
-          />
-        )}
-
-        {showProfileOptions && (
-          <ProfilePictureOptions
-            onClose={() => setShowProfileOptions(false)}
-            onDelete={handleDeleteProfilePicture}
-            onChange={() => {
-              setShowProfileOptions(false);
-              setShowUploadImage(true);
-            }}
-          />
-        )}
-
-        {showUploadImage && (
-          <UploadImage
-            onClose={() => setShowUploadImage(false)}
-            onSave={handleSaveProfilePicture}
-          />
-        )}
-
         {showRateResume && (
-          <RateMyResumePopup
+          <RecruiterRateResumePopup
             onClose={() => setShowRateResume(false)}
-            userId={user?.id}
+            userId={application?.applier_id}
+            jobId={application?.job_id}
           />
         )}
       </div>

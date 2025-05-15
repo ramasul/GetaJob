@@ -20,7 +20,7 @@ export default function NoJobsFound() {
           Refresh Page
         </button>
         <button
-          onClick={() => (window.location.href = "/applicant/home")}
+          onClick={() => (window.location.href = "/home")}
           className="px-6 py-3 bg-white/90 hover:bg-white text-cyan-600 rounded-lg transition-colors duration-200 font-medium border border-cyan-200 cursor-pointer"
         >
           Clear Search

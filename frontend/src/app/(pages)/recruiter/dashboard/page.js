@@ -4,258 +4,161 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import Header from "@/app/components/Header";
 import Link from "next/link";
-import { useAuth } from '@/app/auth/context';
-import { useRouter } from 'next/navigation';
-
-// Dropdown Menu Component
-const JobActionMenu = ({ job, onUpdateStatus }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
-
-  // Log job details for debugging
-  useEffect(() => {
-    console.log('Job Details:', {
-      job_id: job._id,
-      current_status: job.status
-    });
-  }, [job]);
-
-  const toggleMenu = () => setIsOpen(!isOpen);
-
-  const handleDetails = () => {
-    router.push(`/recruiter/dashboard/${job._id}`);
-    setIsOpen(false);
-  };
-
-  const handleStatusChange = async (newStatus) => {
-    try {
-      // Log the details before sending the request
-      console.log('Updating Job Status:', {
-        job_id: job._id,
-        current_status: job.status,
-        new_status: newStatus
-      });
-
-      const response = await fetch(`https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/${job._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          status: newStatus.toLowerCase() 
-        }),
-      });
-
-      // Log the response for debugging
-      const responseData = await response.json();
-      console.log('Update Response:', {
-        status: response.status,
-        ok: response.ok,
-        response_data: responseData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update job status');
-      }
-
-      onUpdateStatus(job._id, newStatus);
-      setIsOpen(false);
-    } catch (error) {
-      console.error('Error updating job status:', error);
-      // Optionally, add error handling (e.g., show error toast)
-    }
-  };
-
-  return (
-    <div className="relative">
-      <button 
-        onClick={toggleMenu} 
-        className="text-gray-500 hover:text-gray-700"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-        </svg>
-      </button>
-      
-      {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-          <div className="py-1" role="menu" aria-orientation="vertical">
-            <button 
-              onClick={handleDetails}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-              role="menuitem"
-            >
-              Details
-            </button>
-            <div className="border-t border-gray-200"></div>
-            <div className="py-1">
-              <button 
-                onClick={() => handleStatusChange('Active')}
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                role="menuitem"
-              >
-                Set to Active
-              </button>
-              <button 
-                onClick={() => handleStatusChange('Inactive')}
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                role="menuitem"
-              >
-                Set to Inactive
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
+import { useAuth } from "@/app/auth/context";
+import { useRouter, useSearchParams } from "next/navigation";
+import { jobService } from "@/app/api/jobService";
+import { applicationService } from "@/app/api/applicationService";
+import { logService } from "@/app/api/logService";
+import Loading from "@/app/components/Loading";
+import ProtectedRoute from "@/app/components/ProtectedRoute";
 
 export default function DashboardCompany() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const router = useRouter();
-  
-  // Get user from auth context
+  const searchParams = useSearchParams();
   const { user } = useAuth();
 
+  // Get URL parameters with defaults
+  const page = Number(searchParams.get("page")) || 1;
+  const itemsPerPage = Number(searchParams.get("per_page")) || 10;
+
+  const [jobs, setJobs] = useState([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [jobStats, setJobStats] = useState({});
+
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchData = async () => {
+      if (!user?.id) return;
+
       try {
-        if (!user || !user.id) return;
-        
-        const response = await fetch(`https://unconscious-puma-universitas-gadjah-mada-f822e818.koyeb.app/jobs/recruiter/${user.id}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch jobs');
+        setLoading(true);
+
+        // Fetch jobs with pagination
+        const jobsData = await jobService.getJobByRecruiterID(
+          user.id,
+          page,
+          itemsPerPage
+        );
+        setJobs(jobsData);
+
+        // Fetch total jobs count
+        const total = await jobService.countJobsByRecruiterID(user.id);
+        setTotalJobs(total);
+
+        // Fetch stats for each job
+        const stats = {};
+        for (const job of jobsData) {
+          const [applicants, views] = await Promise.all([
+            applicationService.getApplierJobCount(job._id),
+            logService.countJobViews(job._id),
+          ]);
+          stats[job._id] = { applicants, views };
         }
-        
-        const data = await response.json();
-        setJobs(data);
-        setLoading(false);
+        setJobStats(stats);
       } catch (err) {
-        console.error("Error fetching jobs:", err);
+        console.error("Error fetching dashboard data:", err);
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
-  
-    fetchJobs();
-  }, [user]);
 
-  // Update job status in local state
-  const handleUpdateStatus = (jobId, newStatus) => {
-    setJobs(prevJobs => 
-      prevJobs.map(job => 
-        job._id === jobId ? { ...job, status: newStatus.toLowerCase() } : job
-      )
-    );
-  };
+    fetchData();
+  }, [user?.id, page, itemsPerPage]);
 
-  // Get status badge color
-  const getStatusBadgeColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-cyan-50 text-cyan-500 border border-cyan-200";
-      case "inactive":
-      case "closed":
-        return "bg-red-50 text-red-500 border border-red-200";
-      default:
-        return "bg-gray-50 text-gray-500 border border-gray-200";
+  const handleStatusToggle = async (jobId, currentStatus, e) => {
+    e.stopPropagation(); // Prevent row click when clicking the button
+    try {
+      const newStatus = currentStatus === "active" ? "inactive" : "active";
+      await jobService.updateJob(jobId, { status: newStatus });
+
+      // Update local state
+      setJobs(
+        jobs.map((job) =>
+          job._id === jobId ? { ...job, status: newStatus } : job
+        )
+      );
+    } catch (error) {
+      console.error("Error updating job status:", error);
     }
   };
 
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("page", newPage);
+    router.push(`?${params.toString()}`);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("per_page", newPerPage);
+    params.set("page", "1"); // Reset to first page
+    router.push(`?${params.toString()}`);
+  };
+
+  const getStatusBadgeColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-cyan-50 text-cyan-700 border border-cyan-200";
+      case "inactive":
+        return "bg-red-50 text-red-700 border border-red-200";
+      default:
+        return "bg-gray-50 text-gray-700 border border-gray-200";
+    }
+  };
+
+  if (loading) return <Loading />;
+
   return (
-    <div className="min-h-screen w-full bg-gradient-to-tr from-[#45D1DD] to-gray-300">
-      {/* Header component */}
-      <Header currentPage="dashboard" userType="recruiter" />
+    <ProtectedRoute userType="recruiter">
+      <div className="min-h-screen bg-gradient-to-tr from-cyan-400 to-cyan-200">
+        <Header currentPage="dashboard" userType={user?.user_type} />
 
-      {/* Job List Container */}
-      <div className="w-[90vw] mx-auto px-4 py-4">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          {/* Job List Header */}
-          <div className="p-6 flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-gray-800">Job List</h2>
-            <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-              Filters
-            </button>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="bg-white/20 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30">
+            {/* Header */}
+            <div className="p-6 border-b border-white/30">
+              <h2 className="text-2xl font-bold text-gray-800">Job List</h2>
+            </div>
 
-          {loading ? (
-            <div className="p-6 text-center">Loading job data...</div>
-          ) : error ? (
-            <div className="p-6 text-center text-red-500">Error loading jobs: {error}</div>
-          ) : (
-            <>
-              {/* Job List Table */}
-              <div className="overflow-x-auto scale-[0.98]">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Job Title
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Status
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Applicants
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Needs
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {jobs.length > 0 ? (
-                      jobs.map((job) => (
-                        <tr 
-                          key={job._id} 
-                          className="hover:bg-gray-50 cursor-pointer"
-                          onClick={() => router.push(`/recruiter/dashboard/${job._id}`)}
+            {error ? (
+              <div className="p-6 text-center text-red-600">Error: {error}</div>
+            ) : (
+              <>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-white/10">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Job Title
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Applicants
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Views
+                        </th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white/5 divide-y divide-gray-200">
+                      {jobs.map((job) => (
+                        <tr
+                          key={job._id}
+                          onClick={() =>
+                            router.push(`/recruiter/dashboard/${job._id}`)
+                          }
+                          className="hover:bg-white/20 transition-all duration-200 cursor-pointer group"
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 group-hover:text-cyan-700 transition-colors">
                               {job.job_title}
                             </div>
                           </td>
@@ -267,151 +170,119 @@ export default function DashboardCompany() {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {/* Static for now */}
-                              {Math.floor(Math.random() * 100) + 1}
+                            <div className="text-sm text-gray-700 group-hover:text-cyan-700 transition-colors">
+                              {jobStats[job._id]?.applicants || 0}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {/* Static for now */}
-                              {Math.floor(Math.random() * 10) + 1} / {Math.floor(Math.random() * 10) + 10}
+                            <div className="text-sm text-gray-700 group-hover:text-cyan-700 transition-colors">
+                              {jobStats[job._id]?.views || 0}
                             </div>
                           </td>
-                          <td 
-                            className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <JobActionMenu 
-                              job={job} 
-                              onUpdateStatus={handleUpdateStatus} 
-                            />
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button
+                              onClick={(e) =>
+                                handleStatusToggle(job._id, job.status, e)
+                              }
+                              className={`cursor-pointer px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 ${
+                                job.status === "active"
+                                  ? "bg-red-50 text-red-700 hover:bg-red-100 hover:shadow-md"
+                                  : "bg-cyan-50 text-cyan-700 hover:bg-cyan-100 hover:shadow-md"
+                              }`}
+                            >
+                              {job.status === "active"
+                                ? "Set Inactive"
+                                : "Set Active"}
+                            </button>
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-sm text-gray-500">
-                          No jobs found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div className="flex items-center">
-                  <span className="text-sm text-gray-700 mr-2">View</span>
-                  <div className="relative">
-                    <select
-                      className="appearance-none h-8 rounded border-gray-300 py-0 pl-3 pr-8 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      value={itemsPerPage}
-                      onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                    >
-                      <option value={10}>10</option>
-                      <option value={20}>20</option>
-                      <option value={30}>30</option>
-                      <option value={40}>40</option>
-                      <option value={50}>50</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-gray-500">
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-700 ml-2">
-                    Items per page
-                  </span>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
-                {jobs.length > 0 && (
-                  <div className="flex items-center justify-between">
-                    <div className="flex">
-                      <button 
-                        className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                        onClick={() => setCurrentPage(currentPage > 1 ? currentPage - 1 : 1)}
-                        disabled={currentPage === 1}
-                      >
-                        <span className="sr-only">Previous</span>
-                        <svg
-                          className="h-5 w-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                      <button className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-none text-white bg-indigo-600 hover:bg-indigo-700">
-                        {currentPage}
-                      </button>
-                      <button 
-                        className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                        disabled={jobs.length < itemsPerPage}
-                      >
-                        <span className="sr-only">Next</span>
-                        <svg
-                          className="h-5 w-5"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    </div>
+                {/* Pagination */}
+                <div className="bg-white/10 px-4 py-3 flex items-center justify-between border-t border-white/30">
+                  <div className="flex items-center">
+                    <span className="text-sm text-gray-700 mr-2">View</span>
+                    <select
+                      className="cursor-pointer bg-white/20 border border-white/30 rounded-md text-sm text-gray-700 py-1 px-2 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      value={itemsPerPage}
+                      onChange={(e) =>
+                        handlePerPageChange(Number(e.target.value))
+                      }
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                    </select>
+                    <span className="text-sm text-gray-700 ml-2">per page</span>
                   </div>
-                )}
-              </div>
-            </>
-          )}
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(1)}
+                      disabled={page === 1}
+                      className="cursor-pointer disabled:cursor-not-allowed px-3 py-1 rounded-md text-sm font-medium bg-white/20 text-gray-700 hover:bg-white/30 disabled:opacity-50"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1}
+                      className="cursor-pointer disabled:cursor-not-allowed px-3 py-1 rounded-md text-sm font-medium bg-white/20 text-gray-700 hover:bg-white/30 disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <span className="px-3 py-1 rounded-md text-sm font-medium bg-cyan-50 text-cyan-700">
+                      {page}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page * itemsPerPage >= totalJobs}
+                      className="cursor-pointer disabled:cursor-not-allowed px-3 py-1 rounded-md text-sm font-medium bg-white/20 text-gray-700 hover:bg-white/30 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() =>
+                        handlePageChange(Math.ceil(totalJobs / itemsPerPage))
+                      }
+                      disabled={page * itemsPerPage >= totalJobs}
+                      className="cursor-pointer disabled:cursor-not-allowed px-3 py-1 rounded-md text-sm font-medium bg-white/20 text-gray-700 hover:bg-white/30 disabled:opacity-50"
+                    >
+                      Last
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Post Job Button */}
+          <div className="mt-6 flex justify-end">
+            <Link href="/recruiter/job-posting">
+              <button className="cursor-pointer inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-cyan-600 hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Post a job
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
-
-      {/* Post Job Button */}
-      <div className="max-w-7xl mx-auto px-4 pb-8 flex justify-end">
-        <Link href="/recruiter/job-posting">
-          <button className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            Post a job
-          </button>
-        </Link>
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 }

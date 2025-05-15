@@ -125,4 +125,14 @@ export const jobService = {
       throw error;
     }
   },
+
+  async countJobsByRecruiterID(recruiter_id) {
+    try {
+      const response = await api.get(`/jobs/recruiter/${recruiter_id}/count`);
+      return response.data;
+    } catch (error) {
+      console.error("Error counting jobs by recruiter ID:", error);
+      throw error;
+    }
+  },
 };

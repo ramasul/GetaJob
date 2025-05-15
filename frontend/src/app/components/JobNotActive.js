@@ -24,7 +24,7 @@ export default function JobNotActive() {
           removed by the employer.
         </p>
         <button
-          onClick={() => router.push("/applicant/home")}
+          onClick={() => router.push("/home")}
           className="cursor-pointer px-6 py-3 bg-cyan-600 text-white rounded-lg font-medium hover:bg-cyan-700 transition-colors duration-200 shadow-lg hover:shadow-xl"
         >
           Browse Other Jobs

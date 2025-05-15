@@ -101,14 +101,14 @@ export default function ApplierAskSuitability({ applierId, jobId, onClose }) {
 
               <div className="space-y-4 text-left">
                 <div>
-                  <h3 className="text-lg font-semibold text-cyan-700 mb-2">
+                  <h3 className="text-lg font-semibold text-cyan-700 mb-2 whitespace-pre-line">
                     Explanation
                   </h3>
                   <p className="text-gray-700">{result?.explanation}</p>
                 </div>
 
                 <div className="border-t border-gray-200 pt-4">
-                  <h3 className="text-lg font-semibold text-cyan-700 mb-2">
+                  <h3 className="text-lg font-semibold text-cyan-700 mb-2 whitespace-pre-line">
                     Suggestions
                   </h3>
                   <p className="text-gray-700">{result?.suggestions}</p>

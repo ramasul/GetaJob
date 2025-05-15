@@ -162,4 +162,16 @@ export const recruiterService = {
       throw error;
     }
   },
+
+  async deleteProfilePicture(recruiter_id) {
+    try {
+      const response = await api.put(
+        `/recruiters/${recruiter_id}/clear-profile-picture`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting profile picture:", error);
+      throw error;
+    }
+  },
 };

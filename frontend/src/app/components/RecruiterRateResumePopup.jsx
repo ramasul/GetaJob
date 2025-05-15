@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { aiService } from "@/app/api/aiService";
 
-export default function RateMyResumePopup({ onClose, userId }) {
+export default function RecruiterRateResumePopup({ onClose, userId, jobId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -37,7 +37,7 @@ export default function RateMyResumePopup({ onClose, userId }) {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await aiService.rateMyResume(userId);
+      const response = await aiService.rateApplierResume(userId, jobId);
       setResult(response);
     } catch (error) {
       console.error("Error rating resume:", error);
@@ -54,13 +54,6 @@ export default function RateMyResumePopup({ onClose, userId }) {
     return "#22c55e"; // green-500
   };
 
-  const getScoreBackground = (score) => {
-    const numScore = parseInt(score);
-    if (numScore <= 35) return "bg-red-50";
-    if (numScore <= 70) return "bg-yellow-50";
-    return "bg-green-50";
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 relative max-h-[80vh] overflow-y-auto overscroll-contain">
@@ -73,10 +66,10 @@ export default function RateMyResumePopup({ onClose, userId }) {
 
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-cyan-700 mb-2">
-            Rate My Resume
+            Rate This Resume for The Job
           </h2>
           <p className="text-gray-600">
-            Get an AI-powered analysis of your resume
+            Get an AI-powered analysis of this resume
           </p>
         </div>
 
@@ -90,7 +83,7 @@ export default function RateMyResumePopup({ onClose, userId }) {
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                "Analyze My Resume"
+                "Analyze This Resume"
               )}
             </button>
             {error && (
@@ -146,23 +139,13 @@ export default function RateMyResumePopup({ onClose, userId }) {
               </div>
             </div>
 
-            {/* Strengths */}
+            {/* Explanation */}
             <div className="bg-white rounded-lg border p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-2 whitespace-pre-line">
-                Strengths
+                Explanation
               </h3>
               <p className="text-gray-600 whitespace-pre-line">
-                {result.strengths}
-              </p>
-            </div>
-
-            {/* Suggestions */}
-            <div className="bg-white rounded-lg border p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2 whitespace-pre-line">
-                Suggestions for Improvement
-              </h3>
-              <p className="text-gray-600 whitespace-pre-line">
-                {result.suggestions}
+                {result.explanation}
               </p>
             </div>
 

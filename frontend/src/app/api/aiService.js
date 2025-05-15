@@ -40,6 +40,21 @@ export const aiService = {
     }
   },
 
+  async rateApplierResume(applier_id, job_id) {
+    try {
+      const response = await api.get(`/resume/recruiter/rate`, {
+        params: {
+          applier_id: applier_id,
+          job_id: job_id,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error rating applier resume:", error);
+      throw error;
+    }
+  },
+
   async parseResume(file) {
     try {
       const response = await api.post(`/resume/parse/pdf_text`, file, {

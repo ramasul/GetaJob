@@ -26,7 +26,7 @@ export default function Login() {
       if (user.user_type === "recruiter") {
         dashboardPath = "/recruiter/dashboard";
       } else if (user.user_type === "applier") {
-        dashboardPath = "/applicant/home"; // Tolong nanti disesuaikan menjadi applier/home bukan applicant
+        dashboardPath = "/home"; // Tolong nanti disesuaikan menjadi applier/home bukan applicant
       }
 
       const redirectParam =
