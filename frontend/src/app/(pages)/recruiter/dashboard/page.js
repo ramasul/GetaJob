@@ -23,7 +23,7 @@ export default function DashboardCompany() {
 
   const [jobs, setJobs] = useState([]);
   const [totalJobs, setTotalJobs] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [jobStats, setJobStats] = useState({});
 
