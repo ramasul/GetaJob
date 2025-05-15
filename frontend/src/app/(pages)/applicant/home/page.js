@@ -16,6 +16,7 @@ import JobCarousel from "@/app/components/JobCarousel";
 import { set } from "zod";
 import Loading from "@/app/components/Loading";
 import { Suspense } from "react";
+import { logService } from "@/app/api/logService";
 
 function JobSearchContent() {
   const [jobs, setJobs] = useState([]);
@@ -25,6 +26,7 @@ function JobSearchContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
@@ -118,6 +120,24 @@ function JobSearchContent() {
     checkProfileAndFetchJobs();
   }, [user, searchParams]);
 
+  const handleJobClick = async (jobId) => {
+    if (user && user.user_type === "applier") {
+      setIsTransitioning(true);
+      const logData = {
+        applier_id: user.id,
+        job_id: jobId,
+      };
+      try {
+        const response = await logService.addLogs(logData);
+      } catch (error) {
+        console.error("Error logging job click:", error);
+      } finally {
+        setIsTransitioning(false);
+      }
+    }
+    router.push(`/applicant/details/${jobId}`);
+  };
+
   const handlePageChange = (page) => {
     router.push(`/applicant/home?query=${searchQuery}&page=${page}`);
   };
@@ -126,7 +146,7 @@ function JobSearchContent() {
     setShowProfilePopup(false);
   };
 
-  if (loading) {
+  if (loading || isTransitioning) {
     return <Loading />;
   }
 
@@ -229,9 +249,7 @@ function JobSearchContent() {
                   {jobs.map((job) => (
                     <div
                       key={job.id}
-                      onClick={() =>
-                        router.push(`/applicant/details/${job.id}`)
-                      }
+                      onClick={() => handleJobClick(job.id)}
                       className="bg-white/90 backdrop-blur-md rounded-xl shadow-lg overflow-hidden border border-white/30 p-6 hover:shadow-xl transition-all duration-200 cursor-pointer"
                     >
                       <div className="flex items-start mb-4">
