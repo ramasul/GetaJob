@@ -9,7 +9,7 @@ class GroqAPI:
             "Content-Type": "application/json"
         }
 
-    async def get_response(self,  prompt: str, system_prompt: str = None, model: str = "llama3-70b-8192", temperature: float = 0.4):
+    async def get_response(self,  prompt: str, system_prompt: str = None, model: str = "llama-3.3-70b-versatile", temperature: float = 0.4):
         messages = []
 
         if system_prompt:
